@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disciplinas</title>
+    
+      <!--Prefech-->
+    <link rel="prefech" href="clases.php" as="document">
+
+    <link rel="icon" href="IMG/favicon.png" type="image/png">
+
+    <!--Preload-->
+    <link rel="preload" as="style" href="CSS/normalize.css">
+    <link rel="stylesheet" href="CSS/normalize.css">
+
+    <link red="preload" href="https://fonts.googleapis.com" crossorigin="crossorigin" as="font">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preload" href="https://fonts.gstatic.com" crossorigin="crossorigin" as="font">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" crossorigin="crossorigin" as="font">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    
+    <link rel="preload" href="CSS/style.css" as="style">
+    <link rel="stylesheet" href="CSS/style.css">
+
+</head>
+<body>
+    <header>
+        <h1 class="titulo">Pilates Studio</h1>
+    </header>
+
+    <div class="nav-bg">
+        <nav class="navegacion-principal">
+
+            <div class="contenedor-logo">
+                <a href="index.html">Glow Studio</a>
+            </div>
+            
+            <div class="menu">
+                <a href="clases.html">Clases</a>
+                <a href="paquetes.html">Paquetes</a>
+                <a href="disciplinas.html">Disciplinas</a>
+                <a href="contacto.html">Contacto</a>
+            </div>
+
+            <div class="img-logo">
+                <a href="login.html" >
+                    <picture>
+                        <source loading="lazy" srcset="IMG/usuario.webp" type="image/webp">
+                        <img src="IMG/usuario.png" alt="Logo usuario" loading="lazy">
+                    </picture>
+                </a>
+                
+                <a href="https://www.instagram.com/neyra_lop?igsh=a3dhZzMzbnRkN2c4" target="_blank" rel="noopener noreferrer" loading="lazy">
+                    <picture>
+                        <source loading="lazy" srcset="IMG/logo-instagram.webp" type="image/webp">
+                        <img src="IMG/logo-instagram.png" alt="Logo instagram">
+                    </picture>
+                </a>
+            </div>
+
+        </nav>
+    </div>
+
+    <section class="hero-disciplinas">
+        <div class="contenido-disciplinas">
+            <h1>Conoce mas <br>
+             sobre nuestras <br>
+              disciplinas</h1>
+        </div>
+    </section>
+
+    <main class="contenedor">
+        <section class="grid-disciplinas">
+            <div>
+                <picture>
+                    <source loading="lazy" srcset="IMG/pilates-reformer.webp" type="image/webp">
+                    <img class="img-disciplinas" src="IMG/pilates-reformer.jpg" alt="Foto Pilates" loading="lazy">
+                </picture>
+
+            </div>
+
+            <div>
+                <h2>Pilates Reformer</h2>
+                <p>Fortalece tu cuerpo desde el centro. Nuestras clases de Pilates mejoran tu postura, 
+                    tonifican el abdomen y aumentan tu flexibilidad con movimientos controlados y de bajo 
+                    impacto. Ideal para estilizar tu figura y prevenir lesiones.
+                </p>
+
+                <button class="boton">Reservar clase ➜</button>
+            </div>
+
+        </section>
+
+        <section class="grid-disciplinas">
+            <div class="cambio">
+                <picture>
+                    <source loading="lazy" srcset="IMG/disciplina-barre.webp" type="image/webp">
+                    <img class="img-disciplinas" src="IMG/disciplina-barre.jpg" alt="Foto Barre" loading="lazy">
+                </picture>
+            </div>
+
+            <div class = "cambio">
+                <h2>Barre</h2>
+                <p>Moldea y tonifica tu cuerpo con nuestro entrenamiento Barre. Combina ballet, pilates y ejercicios 
+                funcionales para trabajar piernas, glúteos y abdomen con movimientos precisos y efectivos. Resultados 
+                visibles en un ambiente dinámico y motivador.
+                </p>
+
+                <button class="boton">Reservar clase ➜</button>
+            </div>
+        </section>
+
+        <section class="grid-disciplinas">
+            <div>
+                <picture>
+                    <source loading="lazy" srcset="IMG/carrusel-yoga.webp" type="image/webp">
+                    <img class="img-disciplinas" src="IMG/carrusel-yoga.jpg" alt="Foto Yoga" loading="lazy">
+                </picture>
+            </div>
+
+            <div>
+                <h2>Yoga</h2>
+                <p>Conecta cuerpo y mente en cada sesión. El Yoga te ayuda a liberar estrés, mejorar tu 
+                    flexibilidad y fortalecer tu cuerpo mientras encuentras equilibrio y bienestar interior. 
+                    Un espacio para respirar, fluir y renovarte.
+                </p>
+
+                <button class="boton">Reservar clase ➜</button>
+            </div>
+        </section>
+
+
+    </main>
+
+    <footer class="footer">
+        <nav>
+            <a href="#">Contacto</a>
+            <a href="#">Paquetes</a>
+            <a href="#">Terminos y condiciones de privacidad</a>
+        </nav>
+    </footer>
+
+    <script src="JS/modernizer.js"></script>
+</body>
+</html>
