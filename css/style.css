@@ -225,7 +225,7 @@ footer{
 
 .contenido-hero{
     position: absolute;
-    background-color: rgb( 0 0 0 / 70%);
+    background-color: rgb( 86 56 45 / 70%);
     width: 100%;
     height: 100%;
 
@@ -729,3 +729,161 @@ footer{
   background-color: #f06449;
 }
 
+/* ============================================================
+   POLISH PASS — additive refinements for homepage rhythm.
+   Scoped to specific parents so other pages stay untouched.
+   ============================================================ */
+
+/* --- Hero: give the overlay typography real presence --- */
+.contenido-hero h2 {
+    font-family: var(--FuenteSecundaria);
+    font-size: 4rem;
+    line-height: 1.1;
+    text-align: center;
+    margin: 0 0 1rem;
+    padding: 0 1.5rem;
+}
+
+.contenido-hero p {
+    font-size: 1.7rem;
+    text-align: center;
+    max-width: 48rem;
+    padding: 0 1.5rem;
+    margin: 0 auto 1rem;
+}
+
+.contenido-hero .boton {
+    margin-top: 1.5rem;
+    width: auto;
+    padding: 1.1rem 2.5rem;
+}
+
+@media (min-width: 768px) {
+    .contenido-hero h2 {
+        font-size: 5.5rem;
+    }
+    .contenido-hero p {
+        font-size: 1.9rem;
+    }
+}
+
+/* --- Disciplines preview (scoped to .paquetes parent so disciplinas.html is unaffected) --- */
+.paquetes .disciplina {
+    background-color: var(--blanco);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(86, 56, 45, 0.08);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.paquetes .disciplina picture {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+}
+
+.paquetes .disciplina img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.paquetes .disciplina h3 {
+    font-family: var(--FuenteSecundaria);
+    font-size: 2.4rem;
+    margin: 1.5rem 1.5rem 0.5rem;
+    text-align: center;
+}
+
+.paquetes .disciplina p {
+    margin: 0 1.5rem;
+    text-align: center;
+}
+
+/* --- Carousel: refined width + rounded corners (slides inherit via overflow:hidden) --- */
+.carrusel {
+    max-width: 1080px;
+    border-radius: 1.5rem;
+    margin: 3rem auto;
+}
+
+/* --- Frase: less aggressive vertical padding --- */
+.frase {
+    padding: 4rem 1.5rem;
+    margin: 4rem 0;
+    font-size: 3rem;
+}
+
+@media (min-width: 768px) {
+    .frase {
+        font-size: 3.5rem;
+        padding: 5rem 1.5rem;
+    }
+}
+
+/* --- Coaches: contained editorial panel, not full-bleed billboard --- */
+.coaches {
+    max-width: 1000px;
+    margin: 4rem auto;
+    padding: 3rem 1.5rem;
+    border-radius: 2rem;
+}
+
+.coach {
+    max-width: 360px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.coach picture {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.coach .img-coach {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.coach h4 {
+    font-family: var(--FuenteSecundaria);
+    margin: 0.5rem 0;
+}
+
+.coach p {
+    text-align: center;
+    padding: 0 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .coaches {
+        padding: 3.5rem 2rem;
+    }
+}
+
+/* --- Disciplinas page: consistent framing for the alternating image-text layout --- */
+.grid-disciplinas picture {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 1.5rem;
+}
+
+.grid-disciplinas .img-disciplinas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 0;
+}

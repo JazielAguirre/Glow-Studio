@@ -1,11 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glow-Studio</title>
+    <title>Glow Studio</title>
+
+    <link rel="icon" href="../IMG/favicon.png" type="image/png">
+
+    <script src="../js/webp.js"></script>
+
+    <link rel="preload" as="style" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/normalize.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
+    <link rel="preload" as="style" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <link rel="prefetch" href="clases.html">
+    <link rel="prefetch" href="disciplinas.html">
 </head>
 <body>
-    <h1>Hola</h1>
+    <header>
+        <h1 class="titulo">Glow Studio</h1>
+    </header>
+
+    <div class="nav-bg">
+        <nav class="navegacion-principal">
+
+            <div class="contenedor-logo">
+                <a href="index.html">Glow Studio</a>
+            </div>
+
+            <div class="menu">
+                <a href="clases.html">Clases</a>
+                <a href="paquetes.html">Paquetes</a>
+                <a href="disciplinas.html">Disciplinas</a>
+                <a href="contacto.html">Contacto</a>
+            </div>
+
+            <div class="img-logo">
+                <a href="login.html">
+                    <picture>
+                        <source srcset="../IMG/usuario.webp" type="image/webp">
+                        <img src="../IMG/usuario.png" alt="Iniciar sesión" loading="lazy">
+                    </picture>
+                </a>
+
+                <a href="https://www.instagram.com/neyra_lop?igsh=a3dhZzMzbnRkN2c4" target="_blank" rel="noopener noreferrer">
+                    <picture>
+                        <source srcset="../IMG/logo-instagram.webp" type="image/webp">
+                        <img src="../IMG/logo-instagram.png" alt="Instagram" loading="lazy">
+                    </picture>
+                </a>
+            </div>
+
+        </nav>
+    </div>
+
+    <main>
+
+        <section class="hero">
+            <div class="contenido-hero">
+                <h2>Bienestar en movimiento</h2>
+                <p>Pilates, Barre y Yoga en un espacio diseñado para que brilles desde adentro.</p>
+                <a class="boton" href="clases.html">Reservar tu clase</a>
+            </div>
+        </section>
+
+        <section class="contenedor">
+            <h2 class="centrar-texto">Nuestras disciplinas</h2>
+
+            <div class="paquetes">
+
+                <article class="disciplina">
+                    <picture>
+                        <source srcset="../IMG/yoga.webp" type="image/webp">
+                        <img src="../IMG/yoga.jpg" alt="Clase de Yoga" loading="lazy">
+                    </picture>
+                    <h3>Yoga</h3>
+                    <p>Equilibrio, respiración y flexibilidad en cada sesión.</p>
+                </article>
+
+                <article class="disciplina">
+                    <picture>
+                        <source srcset="../IMG/disciplina-barre.webp" type="image/webp">
+                        <img src="../IMG/disciplina-barre.jpg" alt="Clase de Barre" loading="lazy">
+                    </picture>
+                    <h3>Barre</h3>
+                    <p>Tonifica piernas, glúteos y abdomen con movimientos precisos.</p>
+                </article>
+
+                <article class="disciplina">
+                    <picture>
+                        <source srcset="../IMG/pilates-reformer.webp" type="image/webp">
+                        <img src="../IMG/pilates-reformer.jpg" alt="Clase de Pilates Reformer" loading="lazy">
+                    </picture>
+                    <h3>Pilates Reformer</h3>
+                    <p>Fortalece tu centro y mejora tu postura con bajo impacto.</p>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="carrusel" aria-label="Galería de disciplinas">
+            <picture>
+                <source srcset="../IMG/carrusel-yoga.webp" type="image/webp">
+                <img class="slide active" src="../IMG/carrusel-yoga.jpg" alt="Sesión grupal de Yoga" loading="lazy">
+            </picture>
+            <picture>
+                <source srcset="../IMG/carrusel-barre.webp" type="image/webp">
+                <img class="slide" src="../IMG/carrusel-barre.jpg" alt="Sesión grupal de Barre" loading="lazy">
+            </picture>
+            <picture>
+                <source srcset="../IMG/carrusel-pilates.webp" type="image/webp">
+                <img class="slide" src="../IMG/carrusel-pilates.jpg" alt="Sesión grupal de Pilates" loading="lazy">
+            </picture>
+        </section>
+
+        <section class="frase">
+            Brilla desde adentro.
+        </section>
+
+        <section class="coaches">
+
+            <article class="coach">
+                <picture>
+                    <source srcset="../IMG/coach.webp" type="image/webp">
+                    <img class="img-coach" src="../IMG/coach.jpg" alt="Instructora de Pilates" loading="lazy">
+                </picture>
+                <h4>Instructora de Pilates</h4>
+                <p>Certificada en Pilates Reformer, acompaña cada sesión con un enfoque personalizado para tus objetivos.</p>
+            </article>
+
+            <article class="coach">
+                <picture>
+                    <source srcset="../IMG/coach.webp" type="image/webp">
+                    <img class="img-coach" src="../IMG/coach.jpg" alt="Instructora de Yoga y Barre" loading="lazy">
+                </picture>
+                <h4>Instructora de Yoga y Barre</h4>
+                <p>Diseña sesiones que combinan fuerza, flexibilidad y mindfulness para todos los niveles.</p>
+            </article>
+
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <nav>
+            <a href="contacto.html">Contacto</a>
+            <a href="paquetes.html">Paquetes</a>
+            <a href="#">Términos y condiciones</a>
+        </nav>
+    </footer>
+
+    <script src="../js/scripts.js" defer></script>
 </body>
 </html>
