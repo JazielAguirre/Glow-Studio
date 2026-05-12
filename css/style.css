@@ -1,0 +1,889 @@
+:root{
+    --rosa: #F2836D;
+    --beish: #E8D8C3;
+    --fondo: #FEEBE7;
+    --negro: #000000;
+    --blanco: #FFFFFF;
+    --rosaOscuro: #f06449;
+    --arena: #D4BFAA;
+    --carfe: #56382D;
+    --gris: #f5f5f5;
+    --doradoSuave: #C6A75E;
+    --FuenteSecundaria: "Playwrite NZ Basic", cursive;
+    --FuentePrincipal: "SN Pro", sans-serif;
+    --fontLogo: "Playfair Display", serif;
+
+}
+
+/*Globales*/
+html{
+    font-size: 62.5%;
+    box-sizing: border-box;
+    scroll-snap-type: y mandatory;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+body{
+    font-size: 16px;
+    font-family: var(--FuentePrincipal);
+    background-color: var(--fondo);
+}
+
+.contenedor{
+    width: 90%;
+    margin: 0 auto;
+    border-radius: 1rem;
+}
+
+.contenedor-paquetes{
+    width: 90%;
+    margin: 0 auto;
+}
+
+@media (min-width: 1140px) {
+    .contenedor{
+        width: 70%;
+    }
+}
+
+.boton{
+    background-color: var(--rosa);
+    color: var(--negro);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    font-size: 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    width: 90%;
+}
+
+.boton:hover{
+    color: var(--blanco)
+}
+
+@media (min-width: 768px) {
+    .boton{
+        width: auto;
+    }
+}
+
+/*
+.sombra{
+    background-color: var(--blanco);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+}
+*/
+/*Tipografia*/
+
+h1{
+    font-family: var(--FuenteSecundaria);
+    font-size: 3.8rem;
+}
+
+h2{
+    font-size: 2.8rem;
+}
+
+h3{
+    font-size: 2.5rem;
+}
+
+h4{
+    font-size: 1.8rem;
+}
+
+h5{
+    font-size: 1.5rem;
+}
+
+p{
+    font-size: 1.8rem;
+    line-height: 1.5;
+    text-align: justify;
+    font-weight: 300;
+} 
+
+footer{
+    background-color: var(--carfe);
+}
+
+/*Utilidades*/
+
+.centrar-texto{
+    text-align: center; 
+}
+
+.flex{
+    display: flex;
+}
+
+.w-sm-100{
+    width: 100%;
+}
+
+.alinear-derecha{
+    justify-content: flex-end;
+}
+
+.alinear-izquierda{
+    justify-content: flex-start;
+}
+/*Titulos*/
+.titulo{
+    text-align: center;
+    font-size: 2rem;
+}
+
+.nav-bg{
+    background-color: var(--carfe);
+} 
+.navegacion-principal{
+    display: flex;
+    flex-direction: column;
+    /*align-items: center;*/
+}
+
+
+.navegacion-principal a{
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: var(--beish);
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 1rem;
+}
+
+
+@media (min-width: 768px) {
+    .navegacion-principal{
+        display: grid;
+        grid-template-columns: 20% 60% 20%;
+    }
+    .navegacion-principal a{
+        padding: 1rem 2rem;
+        text-align: left;
+    }
+    .menu{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+    .img-logo{
+    display: flex;
+    justify-content: flex-end;
+    }
+}
+.contenedor-logo a{
+    font-size: 2.5rem;
+    font-family: var(--fontLogo);
+    color: var(--doradoSuave);
+    min-width: max-content;
+    padding: auto;
+
+}
+
+.menu a:hover{
+    background-color: var(--rosa);
+    color: var(--negro);
+}
+
+/*Hero*/
+
+.webp .hero{
+    background-image: url(../IMG/hero.webp);
+}
+
+.no-webp .hero{
+    background-image: url(../IMG/hero.jpg);
+}
+
+.hero{
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 450px;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.hero-disciplinas{
+    background-image: url(../IMG/disciplinas.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 450px;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.contenido-hero{
+    position: absolute;
+    background-color: rgb( 86 56 45 / 70%);
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--blanco);
+}
+
+.contenido-disciplinas{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    color: var(--blanco);
+    padding: 3rem;
+
+}
+
+.contenido-disciplinas h1{
+    font-size: 5rem;
+    line-height: 7rem;
+
+}
+.footer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 5rem;
+    
+}
+
+.footer a{
+    text-decoration: none;
+    color: var(--blanco);
+    padding: 1rem;
+}
+
+.footer a:hover{
+    color: var(--rosa);
+}
+
+/*
+.disciplina, 
+.navegacion-principal,
+.frase, .nosotros, 
+.coaches{
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}*/
+
+/*Carrusel*/
+.carrusel {
+    position: relative;
+    width: 100%;
+    /*max-width: 800px;*/
+    height: 280px;
+    margin: auto;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .carrusel{
+        height: 450px;
+    }
+}
+
+.slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+/*Disciplinas */
+
+.disciplina{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.disciplina img{
+    width: 100%;
+    border-radius: 1.5rem
+}
+.img-disciplinas{
+    width: 100%;
+    border-radius: 1.5rem;
+}
+
+
+
+.grid-disciplinas h2{
+    font-size: 3rem;
+    margin-bottom: 3rem;
+    font-family: var(--FuenteSecundaria);
+}
+
+.grid-disciplinas{
+    margin-bottom: 5rem;
+}
+
+@media (min-width: 768px) {
+    .grid-disciplinas{
+    display: grid;
+    grid-template-columns: 35% auto;
+    column-gap: 11rem;
+    margin-top: 5rem;
+    margin-bottom: 12rem;
+    }
+    .grid-disciplinas:nth-child(2){
+         grid-template-columns: auto 35%;
+    }
+}
+
+.cambio:nth-child(1){
+    grid-column: 2/3;
+}
+
+.cambio:nth-child(2){
+    grid-column: 1/2;   
+    grid-row: 1/2;
+}
+/*Frase*/
+.frase{
+    text-align: center;
+    font-family: "Playwrite NZ", cursive;
+    background-color: var(--rosa);
+    font-size: 3.5rem;
+    font-weight: 400;
+    padding: 7rem 1rem;
+    margin: 3rem 0;
+}
+
+
+
+/*Coaches*/
+
+.coaches{
+    background-color: var(--rosa);
+    width: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.img-coach{
+    width: 100%;
+}
+
+.coach h4{
+    text-align: center;
+    margin-bottom: 0 0 0 2rem;
+}
+
+.coach{
+    padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .coaches{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /*background-color: var(--rosa);*/
+        /*border: 3px solid var(--rosa);*/
+    }
+    .coach p, .coach h4{
+        font-size: 2rem;
+    }
+    .coach{
+        margin: 2rem;
+    }
+
+    .coach h4{
+        font-weight: 700;
+    }
+}
+
+@media (min-width: 880px) {
+    .coach p, .coach h4{
+        font-size: 2.3rem;
+    }
+    
+}
+
+/*Formulario Contacto*/
+.formulario{
+    background-color: var(--rosa);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    width: min(60rem, 100%);
+    margin: 0 auto;
+    margin-bottom: 5rem;
+}
+
+@media (min-width: 768px) {
+    .contenedor-campos{
+        display: grid;
+        grid-template-columns: 50% 50%;
+        grid-template-rows: auto auto 15rem;
+        column-gap: 1rem;
+    }
+
+    .campo:nth-child(3), 
+    .campo:nth-child(4){
+        grid-column: 1 /3;
+    }
+}
+
+.formulario fieldset{
+    border: none;
+}
+
+.formulario legend{
+    text-align: center;
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--cafe);
+    margin-bottom: 2rem;
+}
+
+
+.campo{
+    margin-bottom: 1rem;
+}
+
+.campo input{
+    border: none;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    width: 100%;
+}
+
+.campo label{
+    display: block;
+    margin: 0.5rem;
+    font-weight: bold;
+}
+
+.enviar input{
+    background-color: var(--carfe);
+    color: var(--blanco);
+    border: none;
+    cursor: pointer;
+}
+
+@media (min-width: 768px) {
+    .boton{
+        width: auto;
+    }
+}
+
+.campo textarea{
+    border: none;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    height: 10rem;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/*Formulario Login*/
+.img-login img{
+    width: 100%;
+    margin-bottom: 2rem;
+    border-radius: 1rem;;
+}
+@media (min-width: 768px ) {
+    .grid-login{
+        display: grid;
+        grid-template-columns: 45% 55%;
+        column-gap: 4rem;
+    }
+
+    .img-login{
+        grid-column: 1/2;
+        grid-row: 1/3;
+    }
+}
+
+@media (min-width: 900px) {
+    .formulario-login{
+        width: 90%;
+    }
+}
+@media (min-width: 1140px) {
+    .formulario-login{
+        width: 70%;
+    }
+}
+.formulario-login{
+    padding: 1rem;
+}
+
+.formulario-login fieldset{
+    border: none;
+}
+
+.formulario-login legend{
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--carfe);
+}
+
+.formulario-login p{
+    font-size: 1.7rem;
+    margin: 0 0 2.5rem 0;
+}
+
+.formulario-login a{
+    color: var(--rosa);
+    text-decoration: none;
+}
+
+.formulario-login a:hover{
+    color: var(--rosaOscuro);
+}
+
+
+
+.formulario-login label{
+    display: block;
+    margin: 0.5rem;
+    font-weight: bold;
+}
+
+.login-campo{
+    margin: 2rem 0;
+}
+
+.login-campo input{
+    border: 2px solid var(--arena);
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+    width: 100%;
+}
+
+.login{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+} 
+
+@media (min-width: 768px) {
+    .login{
+        align-items: flex-end;
+    }
+}
+
+.login a{
+    color: var(--negro);
+    text-decoration: underline;
+}
+.login input{
+    border: none;
+    text-transform: none;
+    padding: 0.8rem;
+}
+.grid-login{
+    margin-top: 4rem;
+}
+
+/*Paquetes*/
+.paquete{
+    border: 2px solid var(--doradoSuave);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.paquete:hover{
+    background-color: var(--blanco);
+}
+.paquete h3{
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.paquete h4{
+    font-size: 3rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.paquete h5{
+    font-size: 1.9rem;
+    margin-top: 1rem;
+}
+
+.paquete span{
+    text-align: right;
+}
+
+.flex-monto{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-monto span{
+    font-size: 3rem;
+}
+
+@media (min-width: 480px) {
+    .paquetes{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        column-gap: 1rem;;
+    }
+}
+
+@media (min-width: 1140px) {
+    .paquetes{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 1rem;;
+    }
+    
+}
+
+/*Clases*/
+.schedule-section {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.schedule-section h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #56382D;
+}
+
+.schedule {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.day-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.day-card:hover {
+  transform: translateY(-5px);
+}
+
+.day-title {
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #f06449;
+}
+
+.class-item {
+  background: #f5f5f5;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.class-name {
+  font-weight: 600;
+}
+
+.class-time {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.reserve-btn {
+  display: block;
+  margin-top: 10px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: #F2836D;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.reserve-btn:hover {
+  background-color: #f06449;
+}
+
+/* ============================================================
+   POLISH PASS — additive refinements for homepage rhythm.
+   Scoped to specific parents so other pages stay untouched.
+   ============================================================ */
+
+/* --- Hero: give the overlay typography real presence --- */
+.contenido-hero h2 {
+    font-family: var(--FuenteSecundaria);
+    font-size: 4rem;
+    line-height: 1.1;
+    text-align: center;
+    margin: 0 0 1rem;
+    padding: 0 1.5rem;
+}
+
+.contenido-hero p {
+    font-size: 1.7rem;
+    text-align: center;
+    max-width: 48rem;
+    padding: 0 1.5rem;
+    margin: 0 auto 1rem;
+}
+
+.contenido-hero .boton {
+    margin-top: 1.5rem;
+    width: auto;
+    padding: 1.1rem 2.5rem;
+}
+
+@media (min-width: 768px) {
+    .contenido-hero h2 {
+        font-size: 5.5rem;
+    }
+    .contenido-hero p {
+        font-size: 1.9rem;
+    }
+}
+
+/* --- Disciplines preview (scoped to .paquetes parent so disciplinas.html is unaffected) --- */
+.paquetes .disciplina {
+    background-color: var(--blanco);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(86, 56, 45, 0.08);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.paquetes .disciplina picture {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+}
+
+.paquetes .disciplina img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.paquetes .disciplina h3 {
+    font-family: var(--FuenteSecundaria);
+    font-size: 2.4rem;
+    margin: 1.5rem 1.5rem 0.5rem;
+    text-align: center;
+}
+
+.paquetes .disciplina p {
+    margin: 0 1.5rem;
+    text-align: center;
+}
+
+/* --- Carousel: refined width + rounded corners (slides inherit via overflow:hidden) --- */
+.carrusel {
+    max-width: 1080px;
+    border-radius: 1.5rem;
+    margin: 3rem auto;
+}
+
+/* --- Frase: less aggressive vertical padding --- */
+.frase {
+    padding: 4rem 1.5rem;
+    margin: 4rem 0;
+    font-size: 3rem;
+}
+
+@media (min-width: 768px) {
+    .frase {
+        font-size: 3.5rem;
+        padding: 5rem 1.5rem;
+    }
+}
+
+/* --- Coaches: contained editorial panel, not full-bleed billboard --- */
+.coaches {
+    max-width: 1000px;
+    margin: 4rem auto;
+    padding: 3rem 1.5rem;
+    border-radius: 2rem;
+}
+
+.coach {
+    max-width: 360px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.coach picture {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.coach .img-coach {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.coach h4 {
+    font-family: var(--FuenteSecundaria);
+    margin: 0.5rem 0;
+}
+
+.coach p {
+    text-align: center;
+    padding: 0 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .coaches {
+        padding: 3.5rem 2rem;
+    }
+}
+
+/* --- Disciplinas page: consistent framing for the alternating image-text layout --- */
+.grid-disciplinas picture {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 1.5rem;
+}
+
+.grid-disciplinas .img-disciplinas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 0;
+}

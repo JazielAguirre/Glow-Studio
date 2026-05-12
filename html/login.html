@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    
+    <link rel="icon" href="../IMG/favicon.png" type="image/png">
+
+    <!--Preload-->
+    <link rel="preload" as="style" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/normalize.css">
+
+    <link rel="preload" href="https://fonts.googleapis.com" crossorigin="crossorigin" as="font">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preload" href="https://fonts.gstatic.com" crossorigin="crossorigin" as="font">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" crossorigin="crossorigin" as="font">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    
+    <link rel="preload" href="../css/style.css" as="style">
+    <link rel="stylesheet" href="../css/style.css">
+
+</head>
+<body>
+    <header>
+        <h1 class="titulo">Glow Studio</h1>
+    </header>
+
+    <div class="nav-bg">
+        <nav class="navegacion-principal">
+
+            <div class="contenedor-logo">
+                <a href="index.html">Glow Studio</a>
+            </div>
+            
+            <div class="menu">
+                <a href="clases.html">Clases</a>
+                <a href="paquetes.html">Paquetes</a>
+                <a href="disciplinas.html">Disciplinas</a>
+                <a href="contacto.html">Contacto</a>
+            </div>
+
+            <div class="img-logo">
+                <a href="login.html" >
+                    <picture>
+                        <source loading="lazy" srcset="../IMG/usuario.webp" type="image/webp">
+                        <img src="../IMG/usuario.png" alt="Logo usuario" loading="lazy">
+                    </picture>
+                </a>
+                
+                <a href="https://www.instagram.com/neyra_lop?igsh=a3dhZzMzbnRkN2c4" target="_blank" rel="noopener noreferrer" loading="lazy">
+                    <picture>
+                        <source loading="lazy" srcset="../IMG/logo-instagram.webp" type="image/webp">
+                        <img src="../IMG/logo-instagram.png" alt="Logo instagram">
+                    </picture>
+                </a>
+            </div>
+
+        </nav>
+    </div>
+
+    <main class="contenedor-paquetes">
+        <section class="grid-login">
+            <form action="" class="formulario-login">
+                <fieldset>
+                    <legend>Inicia sesión</legend>
+                    <p>Inicio sesion para poder reservar una clase</p>
+
+                    <div class="contenedor-login">
+                        <div class="login-campo">
+                            <label for="">Email</label>
+                            <input type="email" placeholder="Ingresa tu correo">
+                        </div>
+
+                        <div class="login-campo">
+                            <label for="">Contraseña</label>
+                            <input type="password" placeholder="Ingresa tu contraseña">
+                        </div>
+
+                        <div class="login">
+                            <a href="#">¿Olvidaste tu contraseña?</a>
+                            <input class="boton w-sm-100" type="submit" value="Iniciar sesión">
+                        </div><br><br>
+                    </div>
+
+                    <p>Si todavia no tienes cuenta, <a href="#">crea una aquí.</a></p>
+
+                </fieldset>
+                    
+            </form>
+
+
+            <div class="img-login">
+                <picture>
+                    <source loading="lazy" srcset="../IMG/coach.webp" type="image/webp">
+                    <img src="../IMG/coach.jpg" alt="Imagen inicio sesion" loading="lazy">
+                </picture>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <nav>
+            <a href="#">Contacto</a>
+            <a href="#">Paquetes</a>
+            <a href="#">Terminos y condiciones de privacidad</a>
+        </nav>
+    
+    </footer>
+</body>
+</html>
