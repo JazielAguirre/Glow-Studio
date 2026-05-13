@@ -34,5 +34,13 @@
         return response.json();
     }
 
-    window.GlowAPI = { API_BASE_URL, getHealth, register, login, me };
+    async function getClases() {
+        const response = await fetch(`${API_BASE_URL}/clases`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    }
+
+    window.GlowAPI = { API_BASE_URL, getHealth, register, login, me, getClases };
 })();
