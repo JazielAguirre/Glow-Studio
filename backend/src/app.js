@@ -4,10 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 
 const healthRoutes = require('./routes/health.routes');
-<<<<<<< ours
-=======
 const authRoutes = require('./routes/auth.routes');
->>>>>>> theirs
+const clasesRoutes = require('./routes/clases.routes');
 const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
@@ -18,10 +16,8 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 app.use('/api/health', healthRoutes);
-<<<<<<< ours
-=======
 app.use('/api/auth', authRoutes);
->>>>>>> theirs
+app.use('/api/clases', clasesRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
