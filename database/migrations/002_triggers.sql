@@ -1,6 +1,10 @@
 -- ============================================================
 -- Glow Studio — Triggers
 -- Business rules enforced at the database layer.
+<<<<<<< ours
+=======
+-- Source of truth: docs/Script-Base-de-Datos.docx (2).pdf
+>>>>>>> theirs
 -- ============================================================
 
 -- ============================================
@@ -44,9 +48,15 @@ CREATE TRIGGER trigger_validar_cupo
 CREATE OR REPLACE FUNCTION validar_paquete()
 RETURNS TRIGGER AS $$
 DECLARE
+<<<<<<< ours
     clases_rest     INT;
     fecha_exp       DATE;
     paquete_estado  VARCHAR(20);
+=======
+    clases_rest    INT;
+    fecha_exp      DATE;
+    paquete_estado VARCHAR(20);
+>>>>>>> theirs
 BEGIN
     SELECT clases_restantes, fecha_expiracion, estado
       INTO clases_rest, fecha_exp, paquete_estado

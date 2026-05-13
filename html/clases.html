@@ -45,7 +45,7 @@
             </div>
 
             <div class="img-logo">
-                <a href="login.html" >
+                <a id="nav-user-link" href="login.html">
                     <picture>
                         <source loading="lazy" srcset="../IMG/usuario.webp" type="image/webp">
                         <img src="../IMG/usuario.png" alt="Logo usuario" loading="lazy">
@@ -81,5 +81,9 @@
     </footer>
     
     <script src="../js/scripts.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/clases.js"></script>
+    <script>Auth.updateNavAuthState();</script>
 </body>
 </html>
