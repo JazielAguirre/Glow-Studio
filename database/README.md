@@ -46,6 +46,4 @@ dropdb glow_studio && createdb glow_studio
 
 ## Adding migrations
 
-Follow the numeric prefix convention (`004_*.sql`, `005_*.sql`, …). Each file must be safely re-runnable on a fresh database. **Never modify a migration that has already been applied** — add a new one instead.
 
-When a migration runner is adopted later (`node-pg-migrate`, `flyway`, etc.), these files port cleanly.
