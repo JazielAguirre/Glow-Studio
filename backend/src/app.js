@@ -7,6 +7,7 @@ const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const clasesRoutes = require('./routes/clases.routes');
 const reservasRoutes = require('./routes/reservas.routes');
+const paquetesRoutes = require('./routes/paquetes.routes');
 const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/clases', clasesRoutes);
 app.use('/api/reservas', reservasRoutes);
+app.use('/api/paquetes', paquetesRoutes);
 
 const { requireAuth } = require('./middleware/auth.middleware');
 const { getMisPaquetes } = require('./controllers/reservas.controller');

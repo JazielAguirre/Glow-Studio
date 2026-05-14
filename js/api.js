@@ -76,6 +76,20 @@
         return response.json();
     }
 
+    async function getPaquetes() {
+        const response = await fetch(`${API_BASE_URL}/paquetes`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    }
+
+    async function comprarPaquete(id_paquete, token) {
+        const response = await fetch(`${API_BASE_URL}/paquetes/${id_paquete}/comprar`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+        });
+        return response.json();
+    }
+
     window.GlowAPI = {
         API_BASE_URL,
         getHealth,
@@ -87,5 +101,7 @@
         getMisReservas,
         cancelarReserva,
         getMisPaquetes,
+        getPaquetes,
+        comprarPaquete,
     };
 })();
