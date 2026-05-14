@@ -34,7 +34,6 @@
         return response.json();
     }
 
- ours
     async function getClases() {
         const response = await fetch(`${API_BASE_URL}/clases`);
         if (!response.ok) {
@@ -43,8 +42,50 @@
         return response.json();
     }
 
-    window.GlowAPI = { API_BASE_URL, getHealth, register, login, me, getClases };
+    async function reservar(id_clase, token) {
+        const response = await fetch(`${API_BASE_URL}/reservas`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify({ id_clase }),
+        });
+        return response.json();
+    }
 
-    window.GlowAPI = { API_BASE_URL, getHealth, register, login, me };
- theirs
+    async function getMisReservas(token) {
+        const response = await fetch(`${API_BASE_URL}/reservas`, {
+            headers: { "Authorization": `Bearer ${token}` },
+        });
+        return response.json();
+    }
+
+    async function cancelarReserva(id_reserva, token) {
+        const response = await fetch(`${API_BASE_URL}/reservas/${id_reserva}/cancelar`, {
+            method: "PATCH",
+            headers: { "Authorization": `Bearer ${token}` },
+        });
+        return response.json();
+    }
+
+    async function getMisPaquetes(token) {
+        const response = await fetch(`${API_BASE_URL}/usuario-paquetes`, {
+            headers: { "Authorization": `Bearer ${token}` },
+        });
+        return response.json();
+    }
+
+    window.GlowAPI = {
+        API_BASE_URL,
+        getHealth,
+        register,
+        login,
+        me,
+        getClases,
+        reservar,
+        getMisReservas,
+        cancelarReserva,
+        getMisPaquetes,
+    };
 })();
