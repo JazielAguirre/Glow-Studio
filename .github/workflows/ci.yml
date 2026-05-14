@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  ci:
+    name: Lint, Syntax & Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: glow_studio
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      PORT: 3010
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: glow_studio
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ci_test_secret
+      JWT_EXPIRES_IN: 1d
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      # ── Lint ────────────────────────────────────────────────────────────
+
+      - name: Check for conflict markers
+        run: |
+          if grep -rn '<<<<<<<\|>>>>>>>' backend/src database/migrations html js 2>/dev/null; then
+            echo "FAIL: conflict markers found in source files"
+            exit 1
+          fi
+          echo "OK: no conflict markers found"
+
+      - name: Syntax check — backend JS
+        run: |
+          EXIT=0
+          while IFS= read -r f; do
+            if node --check "$f" 2>&1; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              EXIT=1
+            fi
+          done < <(find backend/src -name '*.js' | sort)
+          exit $EXIT
+
+      - name: Syntax check — frontend JS
+        run: |
+          EXIT=0
+          while IFS= read -r f; do
+            if node --check "$f" 2>&1; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              EXIT=1
+            fi
+          done < <(find js -name '*.js' | sort)
+          exit $EXIT
+
+      # ── Database ─────────────────────────────────────────────────────────
+
+      - name: Apply database migrations
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/001_schema.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/002_triggers.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/003_seeds.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/004_clases_seed.sql
+          echo "OK: all migrations applied"
+
+      # ── Backend startup ───────────────────────────────────────────────────
+
+      - name: Start backend server
+        run: |
+          nohup node backend/src/server.js > /tmp/backend.log 2>&1 &
+          echo "Backend process started (PID $!)"
+
+      - name: Wait for backend to be ready
+        run: |
+          echo "Waiting for backend on http://localhost:3010 ..."
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:3010/api/health > /dev/null 2>&1; then
+              echo "OK: backend ready after $((i * 2 - 2))s"
+              break
+            fi
+            if [ "$i" -eq 15 ]; then
+              echo "FAIL: backend did not start within 30s"
+              echo "--- backend log ---"
+              cat /tmp/backend.log
+              exit 1
+            fi
+            echo "  attempt $i — waiting 2s..."
+            sleep 2
+          done
+
+      # ── Endpoint smoke tests ──────────────────────────────────────────────
+
+      - name: Endpoint — GET /api/health
+        run: |
+          RESPONSE=$(curl -sf http://localhost:3010/api/health)
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q '"ok":true' || (echo "FAIL: /api/health did not return ok:true"; exit 1)
+          echo "OK: /api/health"
+
+      - name: Endpoint — GET /api/clases (public, returns classes)
+        run: |
+          RESPONSE=$(curl -sf http://localhost:3010/api/clases)
+          echo "$RESPONSE" | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          assert d['ok'], 'ok is not true'
+          print(f'OK: /api/clases returned {len(d[\"clases\"])} classes')
+          "
+
+      - name: Endpoint — GET /api/paquetes (public, returns packages)
+        run: |
+          RESPONSE=$(curl -sf http://localhost:3010/api/paquetes)
+          echo "$RESPONSE" | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          assert d['ok'], 'ok is not true'
+          assert len(d['paquetes']) == 6, f'expected 6 packages, got {len(d[\"paquetes\"])}'
+          print(f'OK: /api/paquetes returned {len(d[\"paquetes\"])} packages')
+          "
+
+      - name: Endpoint — GET /api/reservas (no token must return 401)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3010/api/reservas)
+          echo "Status: $STATUS"
+          [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
+          echo "OK: /api/reservas returns 401 without token"
+
+      - name: Endpoint — GET /api/usuario-paquetes (no token must return 401)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3010/api/usuario-paquetes)
+          echo "Status: $STATUS"
+          [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
+          echo "OK: /api/usuario-paquetes returns 401 without token"
+
+      # ── Always show backend log for debugging ─────────────────────────────
+
+      - name: Show backend log
+        if: always()
+        run: cat /tmp/backend.log 2>/dev/null || echo "(no log)"
