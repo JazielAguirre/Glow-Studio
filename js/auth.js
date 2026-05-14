@@ -63,6 +63,10 @@ var Auth = (function () {
                     e.preventDefault();
                 });
 
+                var reservasLink = document.createElement("a");
+                reservasLink.href = "mis-reservas.html";
+                reservasLink.textContent = "Mis reservas";
+
                 var logoutBtn = document.createElement("a");
                 logoutBtn.href = "#";
                 logoutBtn.textContent = "Cerrar sesión";
@@ -72,6 +76,7 @@ var Auth = (function () {
                 });
 
                 wrapper.appendChild(greeting);
+                wrapper.appendChild(reservasLink);
                 wrapper.appendChild(logoutBtn);
                 link.parentNode.replaceChild(wrapper, link);
             } else {

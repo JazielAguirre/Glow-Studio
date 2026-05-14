@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", async function () {
- ours
     var schedule = document.getElementById("schedule");
     if (!schedule) return;
 
@@ -32,8 +31,34 @@ document.addEventListener("DOMContentLoaded", async function () {
             var btn = document.createElement("button");
             btn.className = "reserve-btn";
             btn.textContent = "Reservar";
-            btn.addEventListener("click", function () {
-                alert("La reserva estará disponible próximamente");
+            btn.addEventListener("click", async function () {
+                btn.disabled = true;
+                btn.textContent = "Reservando…";
+                try {
+                    var token = window.Auth.getToken();
+                    var res = await window.GlowAPI.reservar(clase.id_clase, token);
+                    if (res.ok) {
+                        btn.textContent = "Reservado ✓";
+                    } else if (res.error === "SIN_PAQUETE") {
+                        btn.textContent = "Reservar";
+                        btn.disabled = false;
+                        var msg = document.createElement("p");
+                        msg.className = "centrar-texto";
+                        msg.innerHTML = "Necesitas un paquete activo. <a href=\"paquetes.html\">Ver paquetes</a>.";
+                        btn.parentNode.appendChild(msg);
+                    } else if (res.error === "YA_RESERVADO") {
+                        btn.textContent = "Ya reservada";
+                    } else if (res.error === "CLASE_LLENA") {
+                        btn.textContent = "Lleno";
+                    } else {
+                        btn.textContent = "Error";
+                        btn.disabled = false;
+                    }
+                } catch (err) {
+                    btn.textContent = "Reservar";
+                    btn.disabled = false;
+                    console.warn("[clases] Error al reservar:", err);
+                }
             });
             return btn;
         }
@@ -105,23 +130,5 @@ document.addEventListener("DOMContentLoaded", async function () {
     } catch (err) {
         schedule.innerHTML = '<p class="centrar-texto">' + FAILURE + "</p>";
         console.warn("[clases] Error cargando clases:", err);
-
-    const schedule = document.getElementById("schedule");
-    if (!schedule) return;
-
-    const SUCCESS = "Conectado al backend de Glow Studio ✅";
-    const FAILURE = "No se pudo conectar con el backend. Verifica que el servidor esté corriendo en el puerto 3010.";
-
-    try {
-        const data = await window.GlowAPI.getHealth();
-        if (data && data.ok) {
-            schedule.innerHTML = `<p class="centrar-texto">${SUCCESS}</p>`;
-        } else {
-            schedule.innerHTML = `<p class="centrar-texto">${FAILURE}</p>`;
-        }
-    } catch (err) {
-        schedule.innerHTML = `<p class="centrar-texto">${FAILURE}</p>`;
-        console.warn("[clases] Backend health check failed:", err);
- theirs
     }
 });
