@@ -1,7 +1,5 @@
 -- ============================================================
 -- Glow Studio — Seeds
--- tipos_clase cupos: from docs/Script-Base-de-Datos.docx (2).pdf
--- paquetes: match html/paquetes.html exactly (do not rebalance prices)
 -- ============================================================
 
 -- ============================================
