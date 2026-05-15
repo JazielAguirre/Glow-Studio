@@ -38,16 +38,27 @@ psql -d glow_studio -f migrations/002_triggers.sql  # Business rule triggers
 psql -d glow_studio -f migrations/003_seeds.sql     # Class types and package catalog
 psql -d glow_studio -f migrations/004_clases_seed.sql  # Sample class schedule (upcoming dates)
 psql -d glow_studio -f migrations/006_contactos.sql    # Contact form table + grants
+psql -d glow_studio -f migrations/007_roles.sql        # Normalize tipo_usuario to usuario/admin
 ```
 
 If your PostgreSQL user requires a password or runs on a non-standard port:
 
 ```bash
 PGPASSWORD=yourpassword psql -h localhost -p 5432 -U youruser -d glow_studio -f migrations/001_schema.sql
-# repeat for 002, 003, 004, 006
+# repeat for 002, 003, 004, 006, 007
 ```
 
-> **Note:** Migration `006_contactos.sql` must be run as a superuser (e.g. `postgres`) because it creates a table. It also grants INSERT/SELECT/UPDATE to `glow_user` automatically if that role exists.
+> **Note:** Migrations `006_contactos.sql` and `007_roles.sql` must be run as a superuser (e.g. `postgres`) because they use DDL statements (CREATE TABLE, ALTER TABLE). `006` also grants INSERT/SELECT/UPDATE to `glow_user` automatically if that role exists.
+
+## User roles
+
+`usuarios.tipo_usuario` supports two values: `'usuario'` (default) and `'admin'`.
+
+To promote an existing user to admin, run as superuser or a user with UPDATE on `usuarios`:
+
+```sql
+UPDATE usuarios SET tipo_usuario = 'admin' WHERE email = 'correo@ejemplo.com';
+```
 
 > **Note:** If your PostgreSQL runs on a port other than 5432 (for example 5433), update `DB_PORT` in `backend/.env` accordingly.
 
@@ -68,7 +79,7 @@ The seed is idempotent — it will not insert a duplicate if that user already h
 
 ```bash
 dropdb glow_studio && createdb glow_studio
-# then re-apply migrations 001–004 and 006
+# then re-apply migrations 001–004, 006, and 007
 ```
 
 ## Adding migrations
