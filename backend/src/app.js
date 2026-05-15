@@ -9,6 +9,7 @@ const clasesRoutes = require('./routes/clases.routes');
 const reservasRoutes = require('./routes/reservas.routes');
 const paquetesRoutes = require('./routes/paquetes.routes');
 const contactoRoutes = require('./routes/contacto.routes');
+const adminRoutes = require('./routes/admin.routes');
 const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
@@ -26,8 +27,10 @@ app.use('/api/paquetes', paquetesRoutes);
 app.use('/api/contacto', contactoRoutes);
 
 const { requireAuth } = require('./middleware/auth.middleware');
+const { requireAdmin } = require('./middleware/admin.middleware');
 const { getMisPaquetes } = require('./controllers/reservas.controller');
 app.get('/api/usuario-paquetes', requireAuth, getMisPaquetes);
+app.use('/api/admin', requireAuth, requireAdmin, adminRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

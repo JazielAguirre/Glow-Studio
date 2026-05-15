@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin — Glow Studio</title>
+
+    <link rel="icon" href="../IMG/favicon.png" type="image/png">
+
+    <link rel="preload" as="style" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/normalize.css">
+
+    <link rel="preload" href="https://fonts.googleapis.com" crossorigin="crossorigin" as="font">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preload" href="https://fonts.gstatic.com" crossorigin="crossorigin" as="font">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" crossorigin="crossorigin" as="font">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
+    <link rel="preload" href="../css/style.css" as="style">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .admin-card { background: var(--color-blanco, #fff); border: 1px solid #e0d5cc; border-radius: 8px; padding: 1.8rem 1.2rem; text-align: center; }
+        .admin-card .valor { font-size: 2.2rem; font-weight: 700; color: var(--color-acento, #c9956a); }
+        .admin-card .etiqueta { font-size: 0.95rem; color: #666; margin-top: 0.5rem; }
+        .admin-section { margin: 2.5rem 0; }
+        .admin-section h2 { border-bottom: 1px solid #e0d5cc; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+        .admin-section-desc { color: #888; font-size: 0.9rem; margin: 0 0 1rem; }
+        .admin-subtitle { color: #888; font-size: 1rem; margin: 0.3rem 0 1.5rem; }
+        .admin-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 2rem; justify-content: center; }
+        .admin-nav a { padding: 0.4rem 1.1rem; border: 1px solid #e0d5cc; border-radius: 20px; font-size: 0.9rem; color: #6b4c3b; text-decoration: none; }
+        .admin-nav a:hover { background: #f5ede5; }
+        .admin-subsection-title { font-size: 1rem; color: #999; font-weight: 600; margin: 0 0 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .admin-table th { background: #f5ede5; text-align: left; padding: 0.6rem 0.8rem; font-weight: 600; }
+        .admin-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #f0e8e0; vertical-align: top; }
+        .admin-table tr:last-child td { border-bottom: none; }
+        .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600; }
+        .badge-activa, .badge-activo, .badge-nuevo  { background: #d4edda; color: #155724; }
+        .badge-cancelada, .badge-vencido           { background: #f8d7da; color: #721c24; }
+        .badge-revisado, .badge-usuario            { background: #e2e3e5; color: #383d41; }
+        .badge-admin                               { background: #fff3cd; color: #856404; }
+        #acceso-denegado { display: none; padding: 3rem; text-align: center; color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="titulo">Glow Studio</h1>
+    </header>
+
+    <div class="nav-bg">
+        <nav class="navegacion-principal">
+            <div class="contenedor-logo">
+                <a href="index.html">Glow Studio</a>
+            </div>
+            <div class="menu">
+                <a href="clases.html">Clases</a>
+                <a href="paquetes.html">Paquetes</a>
+                <a href="disciplinas.html">Disciplinas</a>
+                <a href="contacto.html">Contacto</a>
+            </div>
+            <div class="img-logo">
+                <a id="nav-user-link" href="login.html">
+                    <picture>
+                        <source loading="lazy" srcset="../IMG/usuario.webp" type="image/webp">
+                        <img src="../IMG/usuario.png" alt="Logo usuario" loading="lazy">
+                    </picture>
+                </a>
+                <a href="https://www.instagram.com/neyra_lop?igsh=a3dhZzMzbnRkN2c4" target="_blank" rel="noopener noreferrer">
+                    <picture>
+                        <source loading="lazy" srcset="../IMG/logo-instagram.webp" type="image/webp">
+                        <img src="../IMG/logo-instagram.png" alt="Logo instagram">
+                    </picture>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <main class="contenedor">
+
+        <div id="acceso-denegado">
+            <h2>Acceso denegado</h2>
+            <p>No tienes permisos para ver esta página.</p>
+            <a href="index.html" class="boton">Volver al inicio</a>
+        </div>
+
+        <div id="admin-contenido" style="display:none;">
+
+            <section class="admin-section">
+                <h2 class="centrar-texto">Panel de Administración</h2>
+                <p class="centrar-texto admin-subtitle">Resumen general del estudio, reservas, paquetes, usuarios y mensajes de contacto.</p>
+                <nav class="admin-nav">
+                    <a href="#admin-usuarios">Usuarios</a>
+                    <a href="#admin-paquetes">Paquetes</a>
+                    <a href="#admin-reservas">Reservas</a>
+                    <a href="#admin-ocupacion">Ocupación</a>
+                    <a href="#admin-contactos">Contactos</a>
+                </nav>
+                <p class="admin-subsection-title">Resumen general</p>
+                <div class="admin-grid" id="admin-dashboard"></div>
+            </section>
+
+            <section class="admin-section" id="admin-usuarios">
+                <h2>Usuarios registrados</h2>
+                <p class="admin-section-desc">Personas registradas en el sistema.</p>
+                <div id="tabla-usuarios-wrap"></div>
+            </section>
+
+            <section class="admin-section" id="admin-paquetes">
+                <h2>Paquetes adquiridos</h2>
+                <p class="admin-section-desc">Paquetes adquiridos por los usuarios e ingresos estimados.</p>
+                <div id="tabla-paquetes-wrap"></div>
+            </section>
+
+            <section class="admin-section" id="admin-reservas">
+                <h2>Reservas</h2>
+                <p class="admin-section-desc">Historial de reservas activas y canceladas.</p>
+                <div id="tabla-reservas-wrap"></div>
+            </section>
+
+            <section class="admin-section" id="admin-ocupacion">
+                <h2>Ocupación de clases</h2>
+                <p class="admin-section-desc">Cupo disponible y porcentaje de ocupación por clase.</p>
+                <div id="tabla-ocupacion-wrap"></div>
+            </section>
+
+            <section class="admin-section" id="admin-contactos">
+                <h2>Mensajes de contacto</h2>
+                <p class="admin-section-desc">Mensajes enviados desde el formulario de contacto.</p>
+                <div id="tabla-contactos-wrap"></div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <nav>
+            <a href="#">Contacto</a>
+            <a href="#">Paquetes</a>
+            <a href="#">Terminos y condiciones de privacidad</a>
+        </nav>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>Auth.updateNavAuthState();</script>
+</body>
+</html>

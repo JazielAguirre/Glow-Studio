@@ -55,6 +55,7 @@ var Auth = (function () {
                 var firstName = data.user.nombre.split(" ")[0];
 
                 var wrapper = document.createElement("div");
+                wrapper.className = "nav-auth";
 
                 var greeting = document.createElement("a");
                 greeting.href = "#";
@@ -77,6 +78,12 @@ var Auth = (function () {
 
                 wrapper.appendChild(greeting);
                 wrapper.appendChild(reservasLink);
+                if (data.user.tipo_usuario === "admin") {
+                    var adminLink = document.createElement("a");
+                    adminLink.href = "admin.html";
+                    adminLink.textContent = "Admin";
+                    wrapper.appendChild(adminLink);
+                }
                 wrapper.appendChild(logoutBtn);
                 link.parentNode.replaceChild(wrapper, link);
             } else {
