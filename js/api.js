@@ -99,6 +99,48 @@
         return response.json();
     }
 
+    function authHeader(token) {
+        return { "Authorization": `Bearer ${token}` };
+    }
+
+    async function getAdminDashboard(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/dashboard`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminUsuarios(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminPaquetes(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/paquetes`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminReservas(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/reservas`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminClasesOcupacion(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/clases-ocupacion`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminContactos(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/contactos`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function marcarContactoRevisado(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/contactos/${id}/revisar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
     window.GlowAPI = {
         API_BASE_URL,
         getHealth,
@@ -113,5 +155,12 @@
         getPaquetes,
         comprarPaquete,
         enviarContacto,
+        getAdminDashboard,
+        getAdminUsuarios,
+        getAdminPaquetes,
+        getAdminReservas,
+        getAdminClasesOcupacion,
+        getAdminContactos,
+        marcarContactoRevisado,
     };
 })();

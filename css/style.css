@@ -887,3 +887,20 @@ footer{
     display: block;
     border-radius: 0;
 }
+
+/* Logged-in auth links wrapper in nav */
+.navegacion-principal .nav-auth {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.navegacion-principal .nav-auth a {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.5rem;
+    padding: 0.4rem 0.8rem;
+    margin: 0;
+    width: auto;
+}
