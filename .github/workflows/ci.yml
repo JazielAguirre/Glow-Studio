@@ -97,6 +97,8 @@ jobs:
           psql -h localhost -U postgres -d glow_studio -f database/migrations/002_triggers.sql
           psql -h localhost -U postgres -d glow_studio -f database/migrations/003_seeds.sql
           psql -h localhost -U postgres -d glow_studio -f database/migrations/004_clases_seed.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/006_contactos.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/007_roles.sql
           echo "OK: all migrations applied"
 
       # ── Backend startup ───────────────────────────────────────────────────
@@ -167,6 +169,33 @@ jobs:
           echo "Status: $STATUS"
           [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
           echo "OK: /api/usuario-paquetes returns 401 without token"
+
+      - name: Endpoint — POST /api/contacto (public, valid data returns 201)
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3010/api/contacto \
+            -H "Content-Type: application/json" \
+            -d '{"nombre":"CI Test","correo":"ci@test.com","mensaje":"CI smoke test"}')
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
+          [ "$HTTP_CODE" = "201" ] || (echo "FAIL: expected 201, got $HTTP_CODE"; exit 1)
+          echo "$BODY" | grep -q '"ok":true' || (echo "FAIL: ok not true in body"; exit 1)
+          echo "OK: /api/contacto returns 201 with ok:true"
+
+      - name: Endpoint — POST /api/contacto (missing fields must return 400)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3010/api/contacto \
+            -H "Content-Type: application/json" \
+            -d '{"nombre":"CI Only Name"}')
+          echo "Status: $STATUS"
+          [ "$STATUS" = "400" ] || (echo "FAIL: expected 400, got $STATUS"; exit 1)
+          echo "OK: /api/contacto missing fields returns 400"
+
+      - name: Endpoint — GET /api/admin/dashboard (no token must return 401)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3010/api/admin/dashboard)
+          echo "Status: $STATUS"
+          [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
+          echo "OK: /api/admin/dashboard returns 401 without token"
 
       # ── Always show backend log for debugging ─────────────────────────────
 
