@@ -85,13 +85,14 @@
                         </div>
                         
                         <div class="campo">
-                            <label for="">Mensaje</label>
-                            <textarea id="contacto-mensaje"></textarea>
+                            <label for="contacto-mensaje">Mensaje</label>
+                            <textarea id="contacto-mensaje" maxlength="500"></textarea>
+                            <small id="contacto-char-count" style="color:#888;font-size:0.85rem;">0/500</small>
                         </div>
                     </div> <!--.contendor-compos-->
 
                     <div class="enviar flex alinear-derecha">
-                        <input class="boton w-sm-100" type="submit" value="Enviar">
+                        <input id="contacto-submit" class="boton w-sm-100" type="submit" value="Enviar">
                     </div>
                     <p id="contacto-msg" style="min-height:1.8rem;"></p>
 
