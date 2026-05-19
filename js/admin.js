@@ -6,6 +6,9 @@
         return;
     }
 
+    var _data = { usuarios: [], paquetes: [], reservas: [], ocupacion: [], contactos: [] };
+    var _filtros = { busqueda: '', contactoEstado: 'todos', reservaEstado: 'todas' };
+
     function escapeHTML(value) {
         return String(value !== null && value !== undefined ? value : '')
             .replaceAll('&', '&amp;')
@@ -38,6 +41,11 @@
     function td(v) {
         var safe = (v !== null && v !== undefined) ? escapeHTML(v) : '—';
         return '<td>' + safe + '</td>';
+    }
+
+    function match(str) {
+        if (!_filtros.busqueda) return true;
+        return String(str || '').toLowerCase().includes(_filtros.busqueda);
     }
 
     function renderDashboard(d) {
@@ -112,7 +120,7 @@
     }
 
     function renderContactos(contactos) {
-        var html = tabla(
+        document.getElementById('tabla-contactos-wrap').innerHTML = tabla(
             ['Nombre', 'Correo', 'Teléfono', 'Mensaje', 'Estado', 'Fecha', 'Acción'],
             contactos,
             function (c) {
@@ -126,7 +134,30 @@
                     '<td>' + accion + '</td>';
             }
         );
-        document.getElementById('tabla-contactos-wrap').innerHTML = html;
+    }
+
+    function aplicarFiltros() {
+        renderUsuarios(_data.usuarios.filter(function (u) {
+            return match(u.nombre) || match(u.email);
+        }));
+
+        renderPaquetes(_data.paquetes.filter(function (p) {
+            return match(p.usuario) || match(p.email) || match(p.paquete);
+        }));
+
+        renderReservas(_data.reservas.filter(function (r) {
+            var estadoOk = _filtros.reservaEstado === 'todas' || r.estado === _filtros.reservaEstado;
+            return estadoOk && (match(r.usuario) || match(r.email) || match(r.disciplina));
+        }));
+
+        renderOcupacion(_data.ocupacion.filter(function (c) {
+            return match(c.disciplina);
+        }));
+
+        renderContactos(_data.contactos.filter(function (c) {
+            var estadoOk = _filtros.contactoEstado === 'todos' || c.estado === _filtros.contactoEstado;
+            return estadoOk && (match(c.nombre) || match(c.correo) || match(c.mensaje));
+        }));
     }
 
     window._revisarContacto = async function (id, btn) {
@@ -135,9 +166,9 @@
         try {
             var data = await GlowAPI.marcarContactoRevisado(id, token);
             if (data.ok) {
-                var row = btn.closest('tr');
-                row.cells[4].innerHTML = badge('revisado');
-                btn.closest('td').textContent = '—';
+                var c = _data.contactos.find(function (c) { return Number(c.id_contacto) === id; });
+                if (c) c.estado = 'revisado';
+                aplicarFiltros();
             } else {
                 btn.disabled = false;
                 btn.textContent = 'Marcar revisado';
@@ -150,6 +181,38 @@
         }
     };
 
+    function initFiltros() {
+        var busqEl     = document.getElementById('filtro-busqueda');
+        var contactoEl = document.getElementById('filtro-contactos');
+        var reservaEl  = document.getElementById('filtro-reservas');
+        var limpiarBtn = document.getElementById('filtro-limpiar');
+
+        busqEl.addEventListener('input', function () {
+            _filtros.busqueda = busqEl.value.trim().toLowerCase();
+            aplicarFiltros();
+        });
+
+        contactoEl.addEventListener('change', function () {
+            _filtros.contactoEstado = contactoEl.value;
+            aplicarFiltros();
+        });
+
+        reservaEl.addEventListener('change', function () {
+            _filtros.reservaEstado = reservaEl.value;
+            aplicarFiltros();
+        });
+
+        limpiarBtn.addEventListener('click', function () {
+            busqEl.value = '';
+            contactoEl.value = 'todos';
+            reservaEl.value = 'todas';
+            _filtros.busqueda = '';
+            _filtros.contactoEstado = 'todos';
+            _filtros.reservaEstado = 'todas';
+            aplicarFiltros();
+        });
+    }
+
     GlowAPI.me(token).then(function (data) {
         if (!data || !data.ok || data.user.tipo_usuario !== 'admin') {
             document.getElementById('acceso-denegado').style.display = 'block';
@@ -157,6 +220,7 @@
         }
 
         document.getElementById('admin-contenido').style.display = 'block';
+        initFiltros();
 
         Promise.all([
             GlowAPI.getAdminDashboard(token),
@@ -167,11 +231,12 @@
             GlowAPI.getAdminContactos(token),
         ]).then(function (results) {
             if (results[0].ok) renderDashboard(results[0].dashboard);
-            if (results[1].ok) renderUsuarios(results[1].usuarios);
-            if (results[2].ok) renderPaquetes(results[2].paquetes);
-            if (results[3].ok) renderReservas(results[3].reservas);
-            if (results[4].ok) renderOcupacion(results[4].clases);
-            if (results[5].ok) renderContactos(results[5].contactos);
+            if (results[1].ok) _data.usuarios  = results[1].usuarios;
+            if (results[2].ok) _data.paquetes  = results[2].paquetes;
+            if (results[3].ok) _data.reservas  = results[3].reservas;
+            if (results[4].ok) _data.ocupacion = results[4].clases;
+            if (results[5].ok) _data.contactos = results[5].contactos;
+            aplicarFiltros();
         }).catch(function (err) {
             console.error('[admin] Error cargando datos:', err);
         });
