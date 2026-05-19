@@ -714,19 +714,25 @@ footer{
 }
 
 .reserve-btn {
-  display: block;
+  display: inline-block;
+  width: auto;
   margin-top: 10px;
-  padding: 8px;
+  padding: 8px 18px;
   border: none;
   border-radius: 8px;
   background-color: #F2836D;
   color: white;
   cursor: pointer;
+  text-decoration: none;
   transition: background 0.3s ease;
 }
 
 .reserve-btn:hover {
   background-color: #f06449;
+}
+
+.day-card {
+  max-width: 360px;
 }
 
 /* ============================================================
