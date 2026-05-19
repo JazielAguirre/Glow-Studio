@@ -44,6 +44,11 @@
         .badge-revisado, .badge-usuario            { background: #e2e3e5; color: #383d41; }
         .badge-admin                               { background: #fff3cd; color: #856404; }
         #acceso-denegado { display: none; padding: 3rem; text-align: center; color: #c0392b; }
+        .admin-filtros-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; padding: 1rem; background: #f5ede5; border-radius: 8px; }
+        .admin-filtros-bar input[type="text"],
+        .admin-filtros-bar select { padding: 0.4rem 0.7rem; border: 1px solid #e0d5cc; border-radius: 6px; font-size: 0.9rem; background: #fff; }
+        .admin-filtros-bar input[type="text"] { flex: 2; min-width: 200px; }
+        .admin-filtros-bar select { min-width: 140px; }
     </style>
 </head>
 <body>
@@ -102,6 +107,24 @@
                 </nav>
                 <p class="admin-subsection-title">Resumen general</p>
                 <div class="admin-grid" id="admin-dashboard"></div>
+            </section>
+
+            <section class="admin-section" id="admin-filtros">
+                <p class="admin-subsection-title">Filtros de búsqueda</p>
+                <div class="admin-filtros-bar">
+                    <input id="filtro-busqueda" type="text" placeholder="Buscar en todas las tablas...">
+                    <select id="filtro-contactos">
+                        <option value="todos">Contactos: Todos</option>
+                        <option value="nuevo">Nuevo</option>
+                        <option value="revisado">Revisado</option>
+                    </select>
+                    <select id="filtro-reservas">
+                        <option value="todas">Reservas: Todas</option>
+                        <option value="activa">Activa</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                    <button id="filtro-limpiar" type="button" class="boton">Limpiar filtros</button>
+                </div>
             </section>
 
             <section class="admin-section" id="admin-usuarios">
