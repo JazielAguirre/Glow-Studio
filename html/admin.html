@@ -43,7 +43,20 @@
         .badge-cancelada, .badge-vencido           { background: #f8d7da; color: #721c24; }
         .badge-revisado, .badge-usuario            { background: #e2e3e5; color: #383d41; }
         .badge-admin                               { background: #fff3cd; color: #856404; }
+        .badge-inactiva                            { background: #f8d7da; color: #721c24; }
         #acceso-denegado { display: none; padding: 3rem; text-align: center; color: #c0392b; }
+        .clase-form { background: #f5ede5; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+        .clase-form-row { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: flex-end; }
+        .clase-form-field { display: flex; flex-direction: column; gap: 0.25rem; }
+        .clase-form-field label { font-size: 0.82rem; font-weight: 600; color: #555; }
+        .clase-form-field input, .clase-form-field select { padding: 0.4rem 0.6rem; border: 1px solid #e0d5cc; border-radius: 6px; font-size: 0.9rem; background: #fff; }
+        .clase-form-actions { display: flex; gap: 0.4rem; align-items: flex-end; }
+        .clase-form-msg { margin-top: 0.5rem; font-size: 0.88rem; min-height: 1.3rem; }
+        .admin-btn { padding: 0.3rem 0.75rem; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .admin-btn-edit     { background: #d4edda; color: #155724; }
+        .admin-btn-disable  { background: #fff3cd; color: #856404; }
+        .admin-btn-reactivate { background: #d1ecf1; color: #0c5460; }
+        .admin-btn:disabled { opacity: 0.5; cursor: default; }
         .admin-filtros-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; padding: 1rem; background: #f5ede5; border-radius: 8px; }
         .admin-filtros-bar input[type="text"],
         .admin-filtros-bar select { padding: 0.4rem 0.7rem; border: 1px solid #e0d5cc; border-radius: 6px; font-size: 0.9rem; background: #fff; }
@@ -99,6 +112,7 @@
                 <h2 class="centrar-texto">Panel de Administración</h2>
                 <p class="centrar-texto admin-subtitle">Resumen general del estudio, reservas, paquetes, usuarios y mensajes de contacto.</p>
                 <nav class="admin-nav">
+                    <a href="#admin-gestion-clases">Gestión de clases</a>
                     <a href="#admin-usuarios">Usuarios</a>
                     <a href="#admin-paquetes">Paquetes</a>
                     <a href="#admin-reservas">Reservas</a>
@@ -107,6 +121,41 @@
                 </nav>
                 <p class="admin-subsection-title">Resumen general</p>
                 <div class="admin-grid" id="admin-dashboard"></div>
+            </section>
+
+            <section class="admin-section" id="admin-gestion-clases">
+                <h2>Gestión de clases</h2>
+                <p class="admin-section-desc">Crear, editar, deshabilitar y reactivar clases del estudio.</p>
+
+                <p class="admin-subsection-title">Nueva clase / Editar clase</p>
+                <div class="clase-form">
+                    <div class="clase-form-row">
+                        <div class="clase-form-field">
+                            <label for="clase-id-tipo">Disciplina</label>
+                            <select id="clase-id-tipo"></select>
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="clase-fecha">Fecha</label>
+                            <input id="clase-fecha" type="date">
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="clase-hora-inicio">Hora inicio</label>
+                            <input id="clase-hora-inicio" type="time">
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="clase-hora-fin">Hora fin</label>
+                            <input id="clase-hora-fin" type="time">
+                        </div>
+                        <div class="clase-form-actions">
+                            <button id="clase-submit" type="button" class="boton">Guardar</button>
+                            <button id="clase-cancel" type="button" class="boton" style="display:none;">Cancelar</button>
+                        </div>
+                    </div>
+                    <p id="clase-form-msg" class="clase-form-msg"></p>
+                </div>
+
+                <p class="admin-subsection-title">Todas las clases</p>
+                <div id="tabla-clases-wrap"></div>
             </section>
 
             <section class="admin-section" id="admin-filtros">

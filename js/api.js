@@ -141,6 +141,50 @@
         return response.json();
     }
 
+    async function getTiposClase(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/tipos-clase`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminClases(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/clases`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function crearAdminClase(datos, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/clases`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...authHeader(token) },
+            body: JSON.stringify(datos),
+        });
+        return response.json();
+    }
+
+    async function actualizarAdminClase(id, datos, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/clases/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", ...authHeader(token) },
+            body: JSON.stringify(datos),
+        });
+        return response.json();
+    }
+
+    async function deshabilitarAdminClase(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/clases/${id}/deshabilitar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
+    async function reactivarAdminClase(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/clases/${id}/reactivar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
     window.GlowAPI = {
         API_BASE_URL,
         getHealth,
@@ -162,5 +206,11 @@
         getAdminClasesOcupacion,
         getAdminContactos,
         marcarContactoRevisado,
+        getTiposClase,
+        getAdminClases,
+        crearAdminClase,
+        actualizarAdminClase,
+        deshabilitarAdminClase,
+        reactivarAdminClase,
     };
 })();
