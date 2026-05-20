@@ -106,6 +106,83 @@ async function marcarContactoRevisado(id) {
     return result.rows[0] || null;
 }
 
+async function getTiposClase() {
+    const result = await pool.query(
+        `SELECT id_tipo, nombre, cupo_maximo FROM tipos_clase ORDER BY id_tipo`
+    );
+    return result.rows;
+}
+
+async function getAdminClases() {
+    const result = await pool.query(`
+        SELECT c.id_clase,
+               c.id_tipo,
+               tc.nombre   AS disciplina,
+               c.fecha,
+               c.hora_inicio,
+               c.hora_fin,
+               c.estado,
+               tc.cupo_maximo,
+               COUNT(r.id_reserva) FILTER (WHERE r.estado = 'activa')::int AS reservas_activas,
+               (tc.cupo_maximo - COUNT(r.id_reserva) FILTER (WHERE r.estado = 'activa'))::int AS cupo_disponible
+        FROM clases c
+        JOIN tipos_clase tc USING(id_tipo)
+        LEFT JOIN reservas r USING(id_clase)
+        GROUP BY c.id_clase, c.id_tipo, tc.nombre, c.fecha, c.hora_inicio, c.hora_fin, c.estado, tc.cupo_maximo
+        ORDER BY c.fecha DESC, c.hora_inicio
+    `);
+    return result.rows;
+}
+
+async function crearClase({ id_tipo, fecha, hora_inicio, hora_fin }) {
+    const result = await pool.query(
+        `INSERT INTO clases (id_tipo, fecha, hora_inicio, hora_fin)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id_clase, id_tipo, fecha, hora_inicio, hora_fin, estado`,
+        [id_tipo, fecha, hora_inicio, hora_fin]
+    );
+    return result.rows[0];
+}
+
+async function actualizarClase(id, { id_tipo, fecha, hora_inicio, hora_fin }) {
+    const result = await pool.query(
+        `UPDATE clases
+         SET id_tipo = $1, fecha = $2, hora_inicio = $3, hora_fin = $4
+         WHERE id_clase = $5
+         RETURNING id_clase, id_tipo, fecha, hora_inicio, hora_fin, estado`,
+        [id_tipo, fecha, hora_inicio, hora_fin, id]
+    );
+    return result.rows[0] || null;
+}
+
+async function deshabilitarClase(id) {
+    const countRes = await pool.query(
+        `SELECT COUNT(*)::int AS reservas_activas FROM reservas
+         WHERE id_clase = $1 AND estado = 'activa'`,
+        [id]
+    );
+    const reservas_activas = countRes.rows[0].reservas_activas;
+
+    const result = await pool.query(
+        `UPDATE clases SET estado = 'inactiva'
+         WHERE id_clase = $1
+         RETURNING id_clase, estado`,
+        [id]
+    );
+    if (!result.rows[0]) return null;
+    return { ...result.rows[0], reservas_activas };
+}
+
+async function reactivarClase(id) {
+    const result = await pool.query(
+        `UPDATE clases SET estado = 'activa'
+         WHERE id_clase = $1
+         RETURNING id_clase, estado`,
+        [id]
+    );
+    return result.rows[0] || null;
+}
+
 module.exports = {
     getDashboard,
     getUsuarios,
@@ -114,4 +191,10 @@ module.exports = {
     getClasesOcupacion,
     getContactos,
     marcarContactoRevisado,
+    getTiposClase,
+    getAdminClases,
+    crearClase,
+    actualizarClase,
+    deshabilitarClase,
+    reactivarClase,
 };

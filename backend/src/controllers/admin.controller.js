@@ -77,4 +77,194 @@ async function revisarContacto(req, res) {
     }
 }
 
-module.exports = { dashboard, usuarios, paquetes, reservas, clasesOcupacion, contactos, revisarContacto };
+// ── Class management ───────────────────────────────────────────────────────────
+
+async function tiposClase(req, res) {
+    try {
+        const data = await adminService.getTiposClase();
+        return res.json({ ok: true, tipos: data });
+    } catch (err) {
+        console.error('[admin] tipos-clase error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function adminClases(req, res) {
+    try {
+        const data = await adminService.getAdminClases();
+        return res.json({ ok: true, clases: data });
+    } catch (err) {
+        console.error('[admin] clases error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+function parseClaseBody(body) {
+    const { id_tipo, fecha, hora_inicio, hora_fin } = body;
+    const errors = [];
+
+    const idTipo = parseInt(id_tipo, 10);
+    if (!idTipo || isNaN(idTipo)) errors.push('id_tipo debe ser un entero válido');
+    if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) errors.push('fecha requerida (YYYY-MM-DD)');
+    if (!hora_inicio || !/^\d{2}:\d{2}$/.test(hora_inicio)) errors.push('hora_inicio requerida (HH:MM)');
+    if (!hora_fin   || !/^\d{2}:\d{2}$/.test(hora_fin))   errors.push('hora_fin requerida (HH:MM)');
+
+    if (errors.length === 0 && hora_fin <= hora_inicio) {
+        errors.push('hora_fin debe ser mayor que hora_inicio');
+    }
+
+    return { idTipo, fecha, hora_inicio, hora_fin, errors };
+}
+
+async function crearClase(req, res) {
+    const { idTipo, fecha, hora_inicio, hora_fin, errors } = parseClaseBody(req.body);
+    if (errors.length) {
+        return res.status(400).json({ ok: false, error: errors.join('; ') });
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    if (fecha < today) {
+        return res.status(400).json({ ok: false, error: 'La fecha no puede ser en el pasado' });
+    }
+
+    try {
+        const { pool } = require('../config/db');
+
+        const tipoCheck = await pool.query(
+            'SELECT id_tipo FROM tipos_clase WHERE id_tipo = $1', [idTipo]
+        );
+        if (!tipoCheck.rows.length) {
+            return res.status(400).json({ ok: false, error: 'Disciplina (id_tipo) no existe' });
+        }
+
+        const dupCheck = await pool.query(
+            `SELECT id_clase FROM clases
+             WHERE id_tipo = $1 AND fecha = $2 AND hora_inicio = $3 AND estado = 'activa'`,
+            [idTipo, fecha, hora_inicio]
+        );
+        if (dupCheck.rows.length) {
+            return res.status(400).json({ ok: false, error: 'Ya existe una clase activa con esa disciplina, fecha y hora' });
+        }
+
+        const clase = await adminService.crearClase({ id_tipo: idTipo, fecha, hora_inicio, hora_fin });
+        return res.status(201).json({ ok: true, clase });
+    } catch (err) {
+        console.error('[admin] crear-clase error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function actualizarClase(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de clase inválido' });
+    }
+
+    const { idTipo, fecha, hora_inicio, hora_fin, errors } = parseClaseBody(req.body);
+    if (errors.length) {
+        return res.status(400).json({ ok: false, error: errors.join('; ') });
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    if (fecha < today) {
+        return res.status(400).json({ ok: false, error: 'La fecha no puede ser en el pasado' });
+    }
+
+    try {
+        const { pool } = require('../config/db');
+
+        const tipoCheck = await pool.query(
+            'SELECT id_tipo FROM tipos_clase WHERE id_tipo = $1', [idTipo]
+        );
+        if (!tipoCheck.rows.length) {
+            return res.status(400).json({ ok: false, error: 'Disciplina (id_tipo) no existe' });
+        }
+
+        const dupCheck = await pool.query(
+            `SELECT id_clase FROM clases
+             WHERE id_tipo = $1 AND fecha = $2 AND hora_inicio = $3
+               AND estado = 'activa' AND id_clase <> $4`,
+            [idTipo, fecha, hora_inicio, id]
+        );
+        if (dupCheck.rows.length) {
+            return res.status(400).json({ ok: false, error: 'Ya existe otra clase activa con esa disciplina, fecha y hora' });
+        }
+
+        const clase = await adminService.actualizarClase(id, { id_tipo: idTipo, fecha, hora_inicio, hora_fin });
+        if (!clase) {
+            return res.status(404).json({ ok: false, error: 'Clase no encontrada' });
+        }
+        return res.json({ ok: true, clase });
+    } catch (err) {
+        console.error('[admin] actualizar-clase error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function deshabilitarClase(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de clase inválido' });
+    }
+    try {
+        const result = await adminService.deshabilitarClase(id);
+        if (!result) {
+            return res.status(404).json({ ok: false, error: 'Clase no encontrada' });
+        }
+        const response = { ok: true, clase: result };
+        if (result.reservas_activas > 0) {
+            response.advertencia = `La clase tenía ${result.reservas_activas} reserva(s) activa(s)`;
+        }
+        return res.json(response);
+    } catch (err) {
+        console.error('[admin] deshabilitar-clase error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function reactivarClase(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de clase inválido' });
+    }
+    try {
+        const { pool } = require('../config/db');
+
+        const claseCheck = await pool.query(
+            'SELECT id_tipo, fecha, hora_inicio FROM clases WHERE id_clase = $1', [id]
+        );
+        if (!claseCheck.rows.length) {
+            return res.status(404).json({ ok: false, error: 'Clase no encontrada' });
+        }
+        const { id_tipo, fecha, hora_inicio } = claseCheck.rows[0];
+
+        const today = new Date().toISOString().slice(0, 10);
+        const fechaStr = fecha instanceof Date
+            ? fecha.toISOString().slice(0, 10)
+            : String(fecha).slice(0, 10);
+        if (fechaStr < today) {
+            return res.status(400).json({ ok: false, error: 'No se puede reactivar una clase con fecha en el pasado' });
+        }
+
+        const dupCheck = await pool.query(
+            `SELECT id_clase FROM clases
+             WHERE id_tipo = $1 AND fecha = $2 AND hora_inicio = $3
+               AND estado = 'activa' AND id_clase <> $4`,
+            [id_tipo, fecha, hora_inicio, id]
+        );
+        if (dupCheck.rows.length) {
+            return res.status(400).json({ ok: false, error: 'Ya existe una clase activa con esa disciplina, fecha y hora' });
+        }
+
+        const clase = await adminService.reactivarClase(id);
+        return res.json({ ok: true, clase });
+    } catch (err) {
+        console.error('[admin] reactivar-clase error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+module.exports = {
+    dashboard, usuarios, paquetes, reservas, clasesOcupacion, contactos, revisarContacto,
+    tiposClase, adminClases, crearClase, actualizarClase, deshabilitarClase, reactivarClase,
+};
