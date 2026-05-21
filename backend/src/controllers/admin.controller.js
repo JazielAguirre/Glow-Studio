@@ -264,7 +264,133 @@ async function reactivarClase(req, res) {
     }
 }
 
+// ── Package catalogue management ──────────────────────────────────────────────
+
+async function paquetesCatalogo(req, res) {
+    try {
+        const data = await adminService.getPaquetesCatalogo();
+        return res.json({ ok: true, paquetes: data });
+    } catch (err) {
+        console.error('[admin] paquetes-catalogo error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+function parsePaqueteBody(body) {
+    const { nombre, numero_clases, precio, vigencia_dias } = body;
+    const errors = [];
+
+    if (!nombre || typeof nombre !== 'string' || !nombre.trim()) errors.push('nombre requerido');
+
+    const cantidadClases = parseInt(numero_clases, 10);
+    if (!cantidadClases || isNaN(cantidadClases) || cantidadClases <= 0)
+        errors.push('numero_clases debe ser un entero mayor a 0');
+
+    const precioNum = parseFloat(precio);
+    if (precio === undefined || precio === null || precio === '' || isNaN(precioNum) || precioNum < 0)
+        errors.push('precio debe ser un número mayor o igual a 0');
+
+    const vigencia = parseInt(vigencia_dias, 10);
+    if (!vigencia || isNaN(vigencia) || vigencia <= 0)
+        errors.push('vigencia_dias debe ser un entero mayor a 0');
+
+    return { nombre: nombre ? nombre.trim() : '', cantidadClases, precioNum, vigencia, errors };
+}
+
+async function crearAdminPaquete(req, res) {
+    const { nombre, cantidadClases, precioNum, vigencia, errors } = parsePaqueteBody(req.body);
+    if (errors.length) return res.status(400).json({ ok: false, error: errors.join('; ') });
+
+    try {
+        const { pool } = require('../config/db');
+        const dupCheck = await pool.query(
+            `SELECT id_paquete FROM paquetes WHERE LOWER(nombre) = LOWER($1) AND estado = 'activo'`,
+            [nombre]
+        );
+        if (dupCheck.rows.length)
+            return res.status(400).json({ ok: false, error: 'Ya existe un paquete activo con ese nombre' });
+
+        const paquete = await adminService.crearPaquete({
+            nombre, cantidad_clases: cantidadClases, precio: precioNum, vigencia_dias: vigencia,
+        });
+        return res.status(201).json({ ok: true, paquete });
+    } catch (err) {
+        console.error('[admin] crear-paquete error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function actualizarAdminPaquete(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) return res.status(400).json({ ok: false, error: 'ID de paquete inválido' });
+
+    const { nombre, cantidadClases, precioNum, vigencia, errors } = parsePaqueteBody(req.body);
+    if (errors.length) return res.status(400).json({ ok: false, error: errors.join('; ') });
+
+    try {
+        const { pool } = require('../config/db');
+        const dupCheck = await pool.query(
+            `SELECT id_paquete FROM paquetes
+             WHERE LOWER(nombre) = LOWER($1) AND estado = 'activo' AND id_paquete <> $2`,
+            [nombre, id]
+        );
+        if (dupCheck.rows.length)
+            return res.status(400).json({ ok: false, error: 'Ya existe otro paquete activo con ese nombre' });
+
+        const paquete = await adminService.actualizarPaquete(id, {
+            nombre, cantidad_clases: cantidadClases, precio: precioNum, vigencia_dias: vigencia,
+        });
+        if (!paquete) return res.status(404).json({ ok: false, error: 'Paquete no encontrado' });
+        return res.json({ ok: true, paquete });
+    } catch (err) {
+        console.error('[admin] actualizar-paquete error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function deshabilitarAdminPaquete(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) return res.status(400).json({ ok: false, error: 'ID de paquete inválido' });
+    try {
+        const result = await adminService.deshabilitarPaquete(id);
+        if (!result) return res.status(404).json({ ok: false, error: 'Paquete no encontrado' });
+        const response = { ok: true, paquete: result };
+        if (result.veces_vendido > 0)
+            response.advertencia = `El paquete fue adquirido ${result.veces_vendido} vez/veces — los paquetes existentes de usuarios no se ven afectados`;
+        return res.json(response);
+    } catch (err) {
+        console.error('[admin] deshabilitar-paquete error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function reactivarAdminPaquete(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) return res.status(400).json({ ok: false, error: 'ID de paquete inválido' });
+    try {
+        const { pool } = require('../config/db');
+        const pkgCheck = await pool.query('SELECT nombre FROM paquetes WHERE id_paquete = $1', [id]);
+        if (!pkgCheck.rows.length) return res.status(404).json({ ok: false, error: 'Paquete no encontrado' });
+
+        const { nombre } = pkgCheck.rows[0];
+        const dupCheck = await pool.query(
+            `SELECT id_paquete FROM paquetes
+             WHERE LOWER(nombre) = LOWER($1) AND estado = 'activo' AND id_paquete <> $2`,
+            [nombre, id]
+        );
+        if (dupCheck.rows.length)
+            return res.status(400).json({ ok: false, error: 'Ya existe otro paquete activo con ese nombre' });
+
+        const paquete = await adminService.reactivarPaquete(id);
+        return res.json({ ok: true, paquete });
+    } catch (err) {
+        console.error('[admin] reactivar-paquete error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
 module.exports = {
     dashboard, usuarios, paquetes, reservas, clasesOcupacion, contactos, revisarContacto,
     tiposClase, adminClases, crearClase, actualizarClase, deshabilitarClase, reactivarClase,
+    paquetesCatalogo, crearAdminPaquete, actualizarAdminPaquete, deshabilitarAdminPaquete, reactivarAdminPaquete,
 };

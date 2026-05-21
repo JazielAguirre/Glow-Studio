@@ -10,9 +10,11 @@
         usuarios: [], paquetes: [], reservas: [],
         ocupacion: [], contactos: [],
         clases: [], tiposClase: [],
+        paquetesCatalogo: [],
     };
     var _filtros = { busqueda: '', contactoEstado: 'todos', reservaEstado: 'todas' };
-    var _editingClaseId = null;
+    var _editingClaseId    = null;
+    var _editingPaqueteId  = null;
 
     function escapeHTML(value) {
         return String(value !== null && value !== undefined ? value : '')
@@ -379,6 +381,153 @@
         }
     };
 
+    // ── Package management ────────────────────────────────────────────────────
+
+    function renderGestionPaquetes(paquetes) {
+        document.getElementById('tabla-paquetes-catalogo-wrap').innerHTML = tabla(
+            ['ID', 'Nombre', 'Clases', 'Precio', 'Vigencia', 'Estado', 'Vendido', 'Ingresos est.', 'Acciones'],
+            paquetes,
+            function (p) {
+                var acciones = '<button class="admin-btn admin-btn-edit" onclick="window._editarPaquete(' +
+                    Number(p.id_paquete) + ')">Editar</button> ';
+                if (p.estado === 'activo') {
+                    acciones += '<button class="admin-btn admin-btn-disable" onclick="window._deshabilitarPaquete(' +
+                        Number(p.id_paquete) + ', this)">Deshabilitar</button>';
+                } else {
+                    acciones += '<button class="admin-btn admin-btn-reactivate" onclick="window._reactivarPaquete(' +
+                        Number(p.id_paquete) + ', this)">Reactivar</button>';
+                }
+                return td(p.id_paquete) + td(p.nombre) + td(p.cantidad_clases) +
+                    td('$' + Number(p.precio).toFixed(2)) +
+                    td(p.vigencia_dias + ' días') +
+                    '<td>' + badge(p.estado) + '</td>' +
+                    td(p.veces_vendido) +
+                    td('$' + Number(p.ingresos_estimados).toFixed(2)) +
+                    '<td>' + acciones + '</td>';
+            }
+        );
+    }
+
+    function paqueteFormMsg(texto, exito) {
+        var el = document.getElementById('paquete-form-msg');
+        el.textContent = texto;
+        el.style.color = exito ? '#155724' : '#721c24';
+    }
+
+    function resetPaqueteForm() {
+        document.getElementById('paquete-nombre').value    = '';
+        document.getElementById('paquete-clases').value   = '';
+        document.getElementById('paquete-precio').value   = '';
+        document.getElementById('paquete-vigencia').value = '';
+        document.getElementById('paquete-cancel').style.display = 'none';
+        document.getElementById('paquete-submit').textContent  = 'Guardar';
+        paqueteFormMsg('', true);
+        _editingPaqueteId = null;
+    }
+
+    function initPaqueteForm() {
+        var submitBtn = document.getElementById('paquete-submit');
+        var cancelBtn = document.getElementById('paquete-cancel');
+
+        cancelBtn.addEventListener('click', function () { resetPaqueteForm(); });
+
+        submitBtn.addEventListener('click', async function () {
+            var nombre        = document.getElementById('paquete-nombre').value.trim();
+            var numero_clases = document.getElementById('paquete-clases').value;
+            var precio        = document.getElementById('paquete-precio').value;
+            var vigencia_dias = document.getElementById('paquete-vigencia').value;
+
+            if (!nombre || !numero_clases || precio === '' || !vigencia_dias) {
+                paqueteFormMsg('Completa todos los campos.', false);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = _editingPaqueteId ? 'Actualizando...' : 'Guardando...';
+
+            try {
+                var datos = { nombre, numero_clases, precio, vigencia_dias };
+                var data = _editingPaqueteId
+                    ? await GlowAPI.actualizarAdminPaquete(_editingPaqueteId, datos, token)
+                    : await GlowAPI.crearAdminPaquete(datos, token);
+
+                if (data.ok) {
+                    paqueteFormMsg(_editingPaqueteId ? 'Paquete actualizado.' : 'Paquete creado.', true);
+                    resetPaqueteForm();
+                    var res = await GlowAPI.getAdminPaquetesCatalogo(token);
+                    if (res.ok) {
+                        _data.paquetesCatalogo = res.paquetes;
+                        renderGestionPaquetes(_data.paquetesCatalogo);
+                    }
+                } else {
+                    paqueteFormMsg(data.error || 'Error al guardar.', false);
+                }
+            } catch (_) {
+                paqueteFormMsg('Error de conexión.', false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = _editingPaqueteId ? 'Actualizar' : 'Guardar';
+            }
+        });
+    }
+
+    window._editarPaquete = function (id) {
+        var p = _data.paquetesCatalogo.find(function (p) { return Number(p.id_paquete) === id; });
+        if (!p) return;
+        _editingPaqueteId = id;
+        document.getElementById('paquete-nombre').value    = p.nombre;
+        document.getElementById('paquete-clases').value   = p.cantidad_clases;
+        document.getElementById('paquete-precio').value   = Number(p.precio).toFixed(2);
+        document.getElementById('paquete-vigencia').value = p.vigencia_dias;
+        document.getElementById('paquete-cancel').style.display = '';
+        document.getElementById('paquete-submit').textContent   = 'Actualizar';
+        paqueteFormMsg('Editando paquete #' + id, true);
+        document.getElementById('admin-gestion-paquetes').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window._deshabilitarPaquete = async function (id, btn) {
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+            var data = await GlowAPI.deshabilitarAdminPaquete(id, token);
+            if (data.ok) {
+                var p = _data.paquetesCatalogo.find(function (p) { return Number(p.id_paquete) === id; });
+                if (p) p.estado = 'inactivo';
+                renderGestionPaquetes(_data.paquetesCatalogo);
+                if (data.advertencia) alert(data.advertencia);
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Deshabilitar';
+                alert(data.error || 'Error al deshabilitar');
+            }
+        } catch (_) {
+            btn.disabled = false;
+            btn.textContent = 'Deshabilitar';
+            alert('Error de conexión');
+        }
+    };
+
+    window._reactivarPaquete = async function (id, btn) {
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+            var data = await GlowAPI.reactivarAdminPaquete(id, token);
+            if (data.ok) {
+                var p = _data.paquetesCatalogo.find(function (p) { return Number(p.id_paquete) === id; });
+                if (p) p.estado = 'activo';
+                renderGestionPaquetes(_data.paquetesCatalogo);
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Reactivar';
+                alert(data.error || 'Error al reactivar');
+            }
+        } catch (_) {
+            btn.disabled = false;
+            btn.textContent = 'Reactivar';
+            alert('Error de conexión');
+        }
+    };
+
     // ── Bootstrap ─────────────────────────────────────────────────────────────
 
     GlowAPI.me(token).then(function (data) {
@@ -390,6 +539,7 @@
         document.getElementById('admin-contenido').style.display = 'block';
         initFiltros();
         initClaseForm();
+        initPaqueteForm();
 
         Promise.all([
             GlowAPI.getAdminDashboard(token),
@@ -400,13 +550,14 @@
             GlowAPI.getAdminContactos(token),
             GlowAPI.getTiposClase(token),
             GlowAPI.getAdminClases(token),
+            GlowAPI.getAdminPaquetesCatalogo(token),
         ]).then(function (results) {
             if (results[0].ok) renderDashboard(results[0].dashboard);
-            if (results[1].ok) _data.usuarios   = results[1].usuarios;
-            if (results[2].ok) _data.paquetes   = results[2].paquetes;
-            if (results[3].ok) _data.reservas   = results[3].reservas;
-            if (results[4].ok) _data.ocupacion  = results[4].clases;
-            if (results[5].ok) _data.contactos  = results[5].contactos;
+            if (results[1].ok) _data.usuarios          = results[1].usuarios;
+            if (results[2].ok) _data.paquetes          = results[2].paquetes;
+            if (results[3].ok) _data.reservas          = results[3].reservas;
+            if (results[4].ok) _data.ocupacion         = results[4].clases;
+            if (results[5].ok) _data.contactos         = results[5].contactos;
             if (results[6].ok) {
                 _data.tiposClase = results[6].tipos;
                 poblarTiposSelect(_data.tiposClase);
@@ -414,6 +565,10 @@
             if (results[7].ok) {
                 _data.clases = results[7].clases;
                 renderGestionClases(_data.clases);
+            }
+            if (results[8].ok) {
+                _data.paquetesCatalogo = results[8].paquetes;
+                renderGestionPaquetes(_data.paquetesCatalogo);
             }
             aplicarFiltros();
         }).catch(function (err) {

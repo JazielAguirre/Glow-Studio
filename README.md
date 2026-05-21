@@ -1,6 +1,6 @@
 # Glow Studio
 
-Academic web project for a boutique fitness studio. Allows users to register, acquire class packages, reserve classes, and manage reservations.
+Academic web project for a boutique fitness studio. Allows users to register, acquire class packages, reserve classes, manage reservations, and contact the studio. Includes a full admin dashboard with class and package catalogue management, and a demo password reset flow.
 
 **Stack:** Node.js · Express · PostgreSQL · Vanilla JS · HTML/CSS
 
@@ -53,22 +53,24 @@ createdb glow_studio
 
 ```bash
 cd database
-psql -d glow_studio -f migrations/001_schema.sql   # tables and constraints
-psql -d glow_studio -f migrations/002_triggers.sql  # business rule triggers
-psql -d glow_studio -f migrations/003_seeds.sql     # class types and package catalog
-psql -d glow_studio -f migrations/004_clases_seed.sql  # sample class schedule
-psql -d glow_studio -f migrations/006_contactos.sql    # contact form table + grants
-psql -d glow_studio -f migrations/007_roles.sql        # normalize tipo_usuario to usuario/admin
+psql -d glow_studio -f migrations/001_schema.sql              # tables and constraints
+psql -d glow_studio -f migrations/002_triggers.sql             # business rule triggers
+psql -d glow_studio -f migrations/003_seeds.sql                # class types and package catalog
+psql -d glow_studio -f migrations/004_clases_seed.sql          # sample class schedule
+psql -d glow_studio -f migrations/006_contactos.sql            # contact form table + grants
+psql -d glow_studio -f migrations/007_roles.sql                # normalize tipo_usuario to usuario/admin
+psql -d glow_studio -f migrations/008_clases_demo_future_seed.sql  # refresh demo class schedule
+psql -d glow_studio -f migrations/010_password_reset_tokens.sql    # password reset token table
 ```
 
 If your database requires credentials:
 
 ```bash
 PGPASSWORD=yourpassword psql -h localhost -p 5432 -U youruser -d glow_studio -f migrations/001_schema.sql
-# repeat for 002, 003, 004, 006, 007
+# repeat for 002, 003, 004, 006, 007, 008, 010
 ```
 
-> **Note:** Migrations 006 and 007 use DDL (`CREATE TABLE`, `ALTER TABLE`) and must be run as a superuser (e.g. `postgres`). Migration 006 also grants INSERT/SELECT/UPDATE to `glow_user` automatically if that role exists.
+> **Note:** Migrations 006, 007, and 010 use DDL (`CREATE TABLE`, `ALTER TABLE`) and must be run as a superuser (e.g. `postgres`). Migration 006 also grants INSERT/SELECT/UPDATE to `glow_user` automatically if that role exists.
 
 ### 4b. Promote a user to admin (optional)
 
@@ -114,6 +116,8 @@ python3 -m http.server 8765 --bind 127.0.0.1
 | Contact | http://127.0.0.1:8765/html/contacto.html |
 | Login | http://127.0.0.1:8765/html/login.html |
 | Register | http://127.0.0.1:8765/html/registro.html |
+| Forgot password | http://127.0.0.1:8765/html/forgot-password.html |
+| Reset password | http://127.0.0.1:8765/html/reset-password.html?token=... |
 | My Reservations | http://127.0.0.1:8765/html/mis-reservas.html |
 | Admin Panel | http://127.0.0.1:8765/html/admin.html *(admin role required)* |
 
@@ -135,14 +139,25 @@ python3 -m http.server 8765 --bind 127.0.0.1
 > ```
 > This gives the first registered user a 5-class demo package. Do not use in production.
 
+### Password reset flow (demo)
+1. **Go to** `/html/forgot-password.html` (or use the link on the login page)
+2. **Enter your email** — always returns a generic message (no email existence leak)
+3. If the email exists, the API response includes a `demo_reset_url` (local dev only — no real email is sent)
+4. **Open the demo reset URL** — enter and confirm your new password
+5. **Log in** with the new password — old password is invalidated immediately
+6. Reset tokens expire in 30 minutes and are single-use
+
 ### Admin flow
 1. **Promote a user to admin** (one-time DB command — see step 4b above)
 2. **Log in** as admin at `/html/login.html`
 3. The nav shows an **"Admin"** link after login
 4. **Open** `/html/admin.html` — the dashboard loads automatically
 5. Review **metrics**: total users, active packages, estimated revenue, reservations, contact messages
-6. Browse **tables**: users, acquired packages, reservations, class occupancy, contacts
-7. **Mark contacts as reviewed** with the inline button (updates status without reload)
+6. **Gestión de clases**: create, edit, disable, and reactivate scheduled classes
+7. **Gestión de paquetes**: create, edit, disable, and reactivate package catalogue entries
+8. Browse **report tables**: users, acquired packages, reservations, class occupancy, contacts
+9. **Filter tables** using the search bar and status dropdowns
+10. **Mark contacts as reviewed** with the inline button (updates status without reload)
 
 ---
 
@@ -154,8 +169,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
 | GET | `/api/health` | Health check |
 | POST | `/api/auth/register` | Register user |
 | POST | `/api/auth/login` | Login, returns JWT |
-| GET | `/api/clases` | Upcoming classes with capacity |
-| GET | `/api/paquetes` | Package catalog |
+| POST | `/api/auth/forgot-password` | Request password reset (demo token in response) |
+| POST | `/api/auth/reset-password` | Reset password with valid token |
+| GET | `/api/clases` | Upcoming active classes with capacity |
+| GET | `/api/paquetes` | Active package catalog |
 | POST | `/api/contacto` | Submit contact form message |
 
 ### Authenticated (JWT required)
@@ -173,11 +190,22 @@ python3 -m http.server 8765 --bind 127.0.0.1
 |---|---|---|
 | GET | `/api/admin/dashboard` | Aggregated studio metrics |
 | GET | `/api/admin/usuarios` | All registered users |
-| GET | `/api/admin/paquetes` | All acquired packages |
+| GET | `/api/admin/paquetes` | All acquired packages (purchase history) |
 | GET | `/api/admin/reservas` | All reservations |
 | GET | `/api/admin/clases-ocupacion` | Class occupancy rates |
 | GET | `/api/admin/contactos` | Contact form messages |
 | PATCH | `/api/admin/contactos/:id/revisar` | Mark contact as reviewed |
+| GET | `/api/admin/tipos-clase` | Class discipline types |
+| GET | `/api/admin/clases` | All classes (active + inactive) |
+| POST | `/api/admin/clases` | Create a class |
+| PATCH | `/api/admin/clases/:id` | Update a class |
+| PATCH | `/api/admin/clases/:id/deshabilitar` | Disable a class |
+| PATCH | `/api/admin/clases/:id/reactivar` | Reactivate a class |
+| GET | `/api/admin/paquetes-catalogo` | Full package catalogue (active + inactive) with sales data |
+| POST | `/api/admin/paquetes-catalogo` | Create a catalogue package |
+| PATCH | `/api/admin/paquetes-catalogo/:id` | Update a catalogue package |
+| PATCH | `/api/admin/paquetes-catalogo/:id/deshabilitar` | Disable a catalogue package |
+| PATCH | `/api/admin/paquetes-catalogo/:id/reactivar` | Reactivate a catalogue package |
 
 ---
 
@@ -185,7 +213,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 - No real payment flow — package acquisition is demo-only.
 - A cancelled reservation cannot be re-booked for the same class (schema constraint).
-- No password reset flow — the login page shows a contact-the-studio placeholder.
-- Admin panel is read-only — no class creation, package editing, or user deletion from the UI.
+- Password reset sends no real email — the reset link is returned directly in the API response (demo/local only).
+- No pagination in admin report tables.
 - User role promotion (`usuario` → `admin`) requires a direct database UPDATE; there is no UI for it.
 - Contact form messages are stored in the database but no email is sent.

@@ -22,46 +22,144 @@
     <link rel="stylesheet" href="../css/style.css">
 
     <style>
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-        .admin-card { background: var(--color-blanco, #fff); border: 1px solid #e0d5cc; border-radius: 8px; padding: 1.8rem 1.2rem; text-align: center; }
-        .admin-card .valor { font-size: 2.2rem; font-weight: 700; color: var(--color-acento, #c9956a); }
-        .admin-card .etiqueta { font-size: 0.95rem; color: #666; margin-top: 0.5rem; }
-        .admin-section { margin: 2.5rem 0; }
-        .admin-section h2 { border-bottom: 1px solid #e0d5cc; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
-        .admin-section-desc { color: #888; font-size: 0.9rem; margin: 0 0 1rem; }
-        .admin-subtitle { color: #888; font-size: 1rem; margin: 0.3rem 0 1.5rem; }
-        .admin-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 2rem; justify-content: center; }
-        .admin-nav a { padding: 0.4rem 1.1rem; border: 1px solid #e0d5cc; border-radius: 20px; font-size: 0.9rem; color: #6b4c3b; text-decoration: none; }
-        .admin-nav a:hover { background: #f5ede5; }
-        .admin-subsection-title { font-size: 1rem; color: #999; font-weight: 600; margin: 0 0 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .admin-table th { background: #f5ede5; text-align: left; padding: 0.6rem 0.8rem; font-weight: 600; }
-        .admin-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #f0e8e0; vertical-align: top; }
+        /* ── Dashboard metrics grid ──────────────────────────────────────────── */
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .admin-card { background: #fff; border: 1px solid #e8ddd5; border-radius: 10px; padding: 1.6rem 1.2rem; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+        .admin-card:hover { box-shadow: 0 4px 18px rgba(89,56,45,0.1); transform: translateY(-2px); }
+        .admin-card .valor { font-size: 2.2rem; font-weight: 700; color: #c9956a; }
+        .admin-card .etiqueta { font-size: 1.2rem; color: #9a7060; margin-top: 0.45rem; text-transform: uppercase; letter-spacing: 0.07em; }
+
+        /* ── Sections ─────────────────────────────────────────────────────────── */
+        .admin-section { margin: 2.8rem 0; }
+        .admin-section h2 { border-bottom: 2px solid #e8d5c4; padding-bottom: 0.6rem; margin-bottom: 0.6rem; color: #3d2b1f; }
+        .admin-section-desc { color: #9a7060; font-size: 1.2rem; margin: 0 0 1.4rem; }
+        .admin-subtitle { color: #9a7060; font-size: 1.3rem; margin: 0.3rem 0 1.5rem; }
+        .admin-subsection-title { font-size: 1.15rem; color: #b09080; font-weight: 700; margin: 1.8rem 0 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+        /* ── Admin nav pills ─────────────────────────────────────────────────── */
+        .admin-nav { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 2rem; justify-content: center; }
+        .admin-nav a { padding: 0.45rem 1.2rem; border: 1.5px solid #e0d5cc; border-radius: 20px; font-size: 1.3rem; font-weight: 600; color: #7a5a48; text-decoration: none; letter-spacing: 0.02em; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .admin-nav a:hover { background: #f5ede5; border-color: #c9956a; color: #3d2b1f; }
+
+        /* ── Tables ─────────────────────────────────────────────────────────── */
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 1.3rem; }
+        .admin-table th { background: #fdf8f4; text-align: left; padding: 0.85rem 1rem; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9a7060; border-bottom: 2px solid #e8d5c4; }
+        .admin-table td { padding: 0.85rem 1rem; border-bottom: 1px solid #f0e8e0; vertical-align: middle; }
         .admin-table tr:last-child td { border-bottom: none; }
-        .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600; }
+        .admin-table tbody tr { transition: background 0.1s; }
+        .admin-table tbody tr:hover td { background: #fdf8f4; }
+        [id$="-wrap"] { overflow-x: auto; }
+
+        /* ── Badges ──────────────────────────────────────────────────────────── */
+        .badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.03em; }
         .badge-activa, .badge-activo, .badge-nuevo  { background: #d4edda; color: #155724; }
-        .badge-cancelada, .badge-vencido           { background: #f8d7da; color: #721c24; }
-        .badge-revisado, .badge-usuario            { background: #e2e3e5; color: #383d41; }
-        .badge-admin                               { background: #fff3cd; color: #856404; }
-        .badge-inactiva                            { background: #f8d7da; color: #721c24; }
+        .badge-cancelada, .badge-vencido            { background: #f8d7da; color: #721c24; }
+        .badge-revisado, .badge-usuario             { background: #e2e3e5; color: #383d41; }
+        .badge-admin                                { background: #fff3cd; color: #856404; }
+        .badge-inactiva                             { background: #fde8cc; color: #7a4a10; }
+
+        /* ── Access denied ───────────────────────────────────────────────────── */
         #acceso-denegado { display: none; padding: 3rem; text-align: center; color: #c0392b; }
-        .clase-form { background: #f5ede5; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
-        .clase-form-row { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: flex-end; }
-        .clase-form-field { display: flex; flex-direction: column; gap: 0.25rem; }
-        .clase-form-field label { font-size: 0.82rem; font-weight: 600; color: #555; }
-        .clase-form-field input, .clase-form-field select { padding: 0.4rem 0.6rem; border: 1px solid #e0d5cc; border-radius: 6px; font-size: 0.9rem; background: #fff; }
-        .clase-form-actions { display: flex; gap: 0.4rem; align-items: flex-end; }
-        .clase-form-msg { margin-top: 0.5rem; font-size: 0.88rem; min-height: 1.3rem; }
-        .admin-btn { padding: 0.3rem 0.75rem; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
-        .admin-btn-edit     { background: #d4edda; color: #155724; }
-        .admin-btn-disable  { background: #fff3cd; color: #856404; }
-        .admin-btn-reactivate { background: #d1ecf1; color: #0c5460; }
-        .admin-btn:disabled { opacity: 0.5; cursor: default; }
-        .admin-filtros-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; padding: 1rem; background: #f5ede5; border-radius: 8px; }
+
+        /* ── Class management — form card ────────────────────────────────────── */
+        .clase-form {
+            background: #fff;
+            border: 1px solid #e8ddd5;
+            border-radius: 12px;
+            padding: 1.5rem 1.6rem 1.2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 16px rgba(89,56,45,0.07), 0 0 0 1px rgba(201,149,106,0.05);
+        }
+        .clase-form-row { display: flex; flex-wrap: wrap; gap: 1rem 1.3rem; align-items: flex-end; }
+        .clase-form-field { display: flex; flex-direction: column; }
+        .clase-form-field label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #9a7060;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.45rem;
+        }
+        .clase-form-field input, .clase-form-field select {
+            padding: 0.6rem 0.9rem;
+            border: 1.5px solid #e0d5cc;
+            border-radius: 8px;
+            font-size: 1.4rem;
+            background: #fdfaf7;
+            color: #3d2b1f;
+            min-width: 148px;
+            transition: border-color 0.18s, box-shadow 0.18s, background 0.15s;
+        }
+        .clase-form-field input:focus, .clase-form-field select:focus {
+            outline: none;
+            border-color: #c9956a;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(201,149,106,0.15);
+        }
+        .clase-form-actions { display: flex; gap: 0.5rem; align-items: flex-end; padding-bottom: 1px; }
+
+        /* Override global .boton sizing inside the form only */
+        .clase-form-actions .boton {
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 0.6rem 1.6rem;
+            border-radius: 8px;
+            width: auto;
+            margin-top: 0;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        #clase-cancel, #paquete-cancel {
+            background: transparent;
+            color: #8a6550;
+            border: 1.5px solid #e0d5cc;
+        }
+        #clase-cancel:hover, #paquete-cancel:hover { background: #f5ede5; color: #3d2b1f; border-color: #c9956a; }
+        .clase-form-msg { margin-top: 0.9rem; font-size: 1.15rem; min-height: 1.3rem; font-weight: 500; }
+
+        /* ── Admin action buttons — pill system ──────────────────────────────── */
+        .admin-btn {
+            padding: 0.4rem 1.1rem;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: filter 0.15s, transform 0.12s;
+        }
+        .admin-btn:hover:not(:disabled) { filter: brightness(0.88); transform: translateY(-1px); }
+        .admin-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.82); }
+        .admin-btn-edit      { background: #d4edda; color: #155724; }
+        .admin-btn-disable   { background: #ffeeba; color: #7a5200; }
+        .admin-btn-reactivate { background: #cce5ff; color: #004085; }
+        .admin-btn:disabled  { opacity: 0.4; cursor: default; transform: none; filter: none; }
+
+        /* ── Filter bar ──────────────────────────────────────────────────────── */
+        .admin-filtros-bar {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
+            padding: 1rem 1.2rem;
+            background: #fdfaf7;
+            border: 1px solid #e8ddd5;
+            border-radius: 10px;
+            box-shadow: 0 1px 6px rgba(89,56,45,0.05);
+        }
         .admin-filtros-bar input[type="text"],
-        .admin-filtros-bar select { padding: 0.4rem 0.7rem; border: 1px solid #e0d5cc; border-radius: 6px; font-size: 0.9rem; background: #fff; }
+        .admin-filtros-bar select {
+            padding: 0.5rem 0.9rem; border: 1.5px solid #e0d5cc; border-radius: 8px;
+            font-size: 1.3rem; background: #fff; color: #3d2b1f;
+            transition: border-color 0.15s;
+        }
+        .admin-filtros-bar input[type="text"]:focus,
+        .admin-filtros-bar select:focus { outline: none; border-color: #c9956a; }
         .admin-filtros-bar input[type="text"] { flex: 2; min-width: 200px; }
         .admin-filtros-bar select { min-width: 140px; }
+        .admin-filtros-bar .boton {
+            font-size: 1.3rem; padding: 0.55rem 1.3rem; border-radius: 8px;
+            width: auto; margin-top: 0; letter-spacing: 0.03em;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +211,7 @@
                 <p class="centrar-texto admin-subtitle">Resumen general del estudio, reservas, paquetes, usuarios y mensajes de contacto.</p>
                 <nav class="admin-nav">
                     <a href="#admin-gestion-clases">Gestión de clases</a>
+                    <a href="#admin-gestion-paquetes">Gestión de paquetes</a>
                     <a href="#admin-usuarios">Usuarios</a>
                     <a href="#admin-paquetes">Paquetes</a>
                     <a href="#admin-reservas">Reservas</a>
@@ -156,6 +255,41 @@
 
                 <p class="admin-subsection-title">Todas las clases</p>
                 <div id="tabla-clases-wrap"></div>
+            </section>
+
+            <section class="admin-section" id="admin-gestion-paquetes">
+                <h2>Gestión de paquetes</h2>
+                <p class="admin-section-desc">Crear, editar, deshabilitar y reactivar paquetes del catálogo.</p>
+
+                <p class="admin-subsection-title">Nuevo paquete / Editar paquete</p>
+                <div class="clase-form">
+                    <div class="clase-form-row">
+                        <div class="clase-form-field">
+                            <label for="paquete-nombre">Nombre</label>
+                            <input id="paquete-nombre" type="text" placeholder="Ej. 10 Clases" style="min-width:180px;">
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="paquete-clases">Clases</label>
+                            <input id="paquete-clases" type="number" min="1" placeholder="10">
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="paquete-precio">Precio ($)</label>
+                            <input id="paquete-precio" type="number" min="0" step="0.01" placeholder="999.00">
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="paquete-vigencia">Vigencia (días)</label>
+                            <input id="paquete-vigencia" type="number" min="1" placeholder="30">
+                        </div>
+                        <div class="clase-form-actions">
+                            <button id="paquete-submit" type="button" class="boton">Guardar</button>
+                            <button id="paquete-cancel" type="button" class="boton" style="display:none;">Cancelar</button>
+                        </div>
+                    </div>
+                    <p id="paquete-form-msg" class="clase-form-msg"></p>
+                </div>
+
+                <p class="admin-subsection-title">Catálogo de paquetes</p>
+                <div id="tabla-paquetes-catalogo-wrap"></div>
             </section>
 
             <section class="admin-section" id="admin-filtros">

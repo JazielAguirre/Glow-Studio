@@ -16,6 +16,7 @@ The schema is the source of truth — extracted from `docs/Script-Base-de-Datos.
 | `usuario_paquetes`  | Packages purchased by a user (with balance + expiry) |
 | `uso_paquete`       | Records each time a package class is consumed |
 | `contactos`         | Contact form messages submitted by visitors   |
+| `password_reset_tokens` | Hashed single-use tokens for password reset (expires 30 min) |
 
 ## Business rules (enforced via triggers)
 
@@ -37,18 +38,24 @@ psql -d glow_studio -f migrations/001_schema.sql   # Tables and constraints
 psql -d glow_studio -f migrations/002_triggers.sql  # Business rule triggers
 psql -d glow_studio -f migrations/003_seeds.sql     # Class types and package catalog
 psql -d glow_studio -f migrations/004_clases_seed.sql  # Sample class schedule (upcoming dates)
-psql -d glow_studio -f migrations/006_contactos.sql    # Contact form table + grants
-psql -d glow_studio -f migrations/007_roles.sql        # Normalize tipo_usuario to usuario/admin
+psql -d glow_studio -f migrations/006_contactos.sql            # Contact form table + grants
+psql -d glow_studio -f migrations/007_roles.sql                # Normalize tipo_usuario to usuario/admin
+psql -d glow_studio -f migrations/008_clases_demo_future_seed.sql  # Refresh future demo class schedule
+psql -d glow_studio -f migrations/010_password_reset_tokens.sql    # Password reset token table
 ```
 
 If your PostgreSQL user requires a password or runs on a non-standard port:
 
 ```bash
 PGPASSWORD=yourpassword psql -h localhost -p 5432 -U youruser -d glow_studio -f migrations/001_schema.sql
-# repeat for 002, 003, 004, 006, 007
+# repeat for 002, 003, 004, 006, 007, 008, 010
 ```
 
-> **Note:** Migrations `006_contactos.sql` and `007_roles.sql` must be run as a superuser (e.g. `postgres`) because they use DDL statements (CREATE TABLE, ALTER TABLE). `006` also grants INSERT/SELECT/UPDATE to `glow_user` automatically if that role exists.
+> **Note:** Migrations `006_contactos.sql`, `007_roles.sql`, and `010_password_reset_tokens.sql` must be run as a superuser (e.g. `postgres`) because they use DDL statements (`CREATE TABLE`, `ALTER TABLE`). `006` also grants INSERT/SELECT/UPDATE to `glow_user` automatically if that role exists.
+
+**Migration notes:**
+- `008_clases_demo_future_seed.sql` — inserts demo classes using `CURRENT_DATE + N` so the schedule always shows upcoming dates. Idempotent: skips any slot already occupied by an active class. Does not delete past classes.
+- `010_password_reset_tokens.sql` — creates the `password_reset_tokens` table. Raw tokens are never stored; only SHA-256 hashes. Tokens expire after 30 minutes and are single-use.
 
 ## User roles
 
@@ -79,7 +86,7 @@ The seed is idempotent — it will not insert a duplicate if that user already h
 
 ```bash
 dropdb glow_studio && createdb glow_studio
-# then re-apply migrations 001–004, 006, and 007
+# then re-apply migrations 001–004, 006, 007, 008, and 010
 ```
 
 ## Adding migrations

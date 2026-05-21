@@ -13,6 +13,11 @@ const {
     actualizarClase,
     deshabilitarClase,
     reactivarClase,
+    paquetesCatalogo,
+    crearAdminPaquete,
+    actualizarAdminPaquete,
+    deshabilitarAdminPaquete,
+    reactivarAdminPaquete,
 } = require('../controllers/admin.controller');
 
 const router = express.Router();
@@ -32,5 +37,12 @@ router.post('/clases',                  crearClase);
 router.patch('/clases/:id',             actualizarClase);
 router.patch('/clases/:id/deshabilitar', deshabilitarClase);
 router.patch('/clases/:id/reactivar',   reactivarClase);
+
+// Package catalogue management
+router.get('/paquetes-catalogo',                        paquetesCatalogo);
+router.post('/paquetes-catalogo',                       crearAdminPaquete);
+router.patch('/paquetes-catalogo/:id',                  actualizarAdminPaquete);
+router.patch('/paquetes-catalogo/:id/deshabilitar',     deshabilitarAdminPaquete);
+router.patch('/paquetes-catalogo/:id/reactivar',        reactivarAdminPaquete);
 
 module.exports = router;
