@@ -68,6 +68,10 @@ var Auth = (function () {
                 reservasLink.href = "mis-reservas.html";
                 reservasLink.textContent = "Mis reservas";
 
+                var paquetesLink = document.createElement("a");
+                paquetesLink.href = "mis-paquetes.html";
+                paquetesLink.textContent = "Mis paquetes";
+
                 var logoutBtn = document.createElement("a");
                 logoutBtn.href = "#";
                 logoutBtn.textContent = "Cerrar sesión";
@@ -78,6 +82,7 @@ var Auth = (function () {
 
                 wrapper.appendChild(greeting);
                 wrapper.appendChild(reservasLink);
+                wrapper.appendChild(paquetesLink);
                 if (data.user.tipo_usuario === "admin") {
                     var adminLink = document.createElement("a");
                     adminLink.href = "admin.html";

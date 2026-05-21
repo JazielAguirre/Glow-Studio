@@ -222,6 +222,20 @@ jobs:
           [ "$STATUS" = "400" ] || (echo "FAIL: expected 400, got $STATUS"; exit 1)
           echo "OK: /api/auth/reset-password returns 400 for invalid token"
 
+      - name: Endpoint — GET /api/paquetes/mis-paquetes (no token must return 401)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3010/api/paquetes/mis-paquetes)
+          echo "Status: $STATUS"
+          [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
+          echo "OK: /api/paquetes/mis-paquetes returns 401 without token"
+
+      - name: Endpoint — GET /api/admin/usuarios/1/detalle (no token must return 401)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3010/api/admin/usuarios/1/detalle)
+          echo "Status: $STATUS"
+          [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
+          echo "OK: /api/admin/usuarios/:id/detalle returns 401 without token"
+
       # ── Always show backend log for debugging ─────────────────────────────
 
       - name: Show backend log

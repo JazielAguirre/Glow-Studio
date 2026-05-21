@@ -242,6 +242,41 @@
         return response.json();
     }
 
+    async function getMisPaquetesHistorial(token) {
+        const response = await fetch(`${API_BASE_URL}/paquetes/mis-paquetes`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function getAdminUsuarioDetalle(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios/${id}/detalle`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function actualizarAdminUsuarioRol(id, tipo_usuario, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios/${id}/rol`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", ...authHeader(token) },
+            body: JSON.stringify({ tipo_usuario }),
+        });
+        return response.json();
+    }
+
+    async function deshabilitarAdminUsuario(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios/${id}/deshabilitar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
+    async function reactivarAdminUsuario(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/usuarios/${id}/reactivar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
     window.GlowAPI = {
         API_BASE_URL,
         getHealth,
@@ -276,5 +311,10 @@
         actualizarAdminPaquete,
         deshabilitarAdminPaquete,
         reactivarAdminPaquete,
+        getMisPaquetesHistorial,
+        getAdminUsuarioDetalle,
+        actualizarAdminUsuarioRol,
+        deshabilitarAdminUsuario,
+        reactivarAdminUsuario,
     };
 })();

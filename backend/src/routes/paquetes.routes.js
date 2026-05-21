@@ -4,7 +4,8 @@ const paquetesController = require('../controllers/paquetes.controller');
 
 const router = express.Router();
 
-router.get('/', paquetesController.getPaquetes);
-router.post('/:id/comprar', requireAuth, paquetesController.comprarPaquete);
+router.get('/',               paquetesController.getPaquetes);
+router.get('/mis-paquetes',   requireAuth, paquetesController.getMisCompras);
+router.post('/:id/comprar',   requireAuth, paquetesController.comprarPaquete);
 
 module.exports = router;

@@ -18,6 +18,10 @@ const {
     actualizarAdminPaquete,
     deshabilitarAdminPaquete,
     reactivarAdminPaquete,
+    usuarioDetalle,
+    cambiarRolHandler,
+    deshabilitarUsuarioHandler,
+    reactivarUsuarioHandler,
 } = require('../controllers/admin.controller');
 
 const router = express.Router();
@@ -44,5 +48,11 @@ router.post('/paquetes-catalogo',                       crearAdminPaquete);
 router.patch('/paquetes-catalogo/:id',                  actualizarAdminPaquete);
 router.patch('/paquetes-catalogo/:id/deshabilitar',     deshabilitarAdminPaquete);
 router.patch('/paquetes-catalogo/:id/reactivar',        reactivarAdminPaquete);
+
+// User management
+router.get('/usuarios/:id/detalle',          usuarioDetalle);
+router.patch('/usuarios/:id/rol',            cambiarRolHandler);
+router.patch('/usuarios/:id/deshabilitar',   deshabilitarUsuarioHandler);
+router.patch('/usuarios/:id/reactivar',      reactivarUsuarioHandler);
 
 module.exports = router;

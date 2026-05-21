@@ -3,66 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paquetes</title>
-    
+    <title>Mis compras — Glow Studio</title>
+
     <link rel="icon" href="../IMG/favicon.png" type="image/png">
 
-    <!--Preload-->
     <link rel="preload" as="style" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/normalize.css">
 
     <link rel="preload" href="https://fonts.googleapis.com" crossorigin="crossorigin" as="font">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
     <link rel="preload" href="https://fonts.gstatic.com" crossorigin="crossorigin" as="font">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" crossorigin="crossorigin" as="font">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+NZ+Basic:wght@100..400&family=Playwrite+NZ:wght@100..400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-    
+
     <link rel="preload" href="../css/style.css" as="style">
     <link rel="stylesheet" href="../css/style.css">
 
     <style>
-        /* ── Purchase confirmation overlay ──────────────────────────────────── */
-        .paquete { position: relative; }
-        .glow-confirm-overlay { margin-top: 1rem; }
-        .glow-confirm-card, .glow-recibo-card {
+        .compras-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.2rem 3rem; }
+        .compras-titulo { font-size: 2.4rem; font-weight: 700; color: #3d2b1f; margin-bottom: 2rem; text-align: center; }
+        .compra-card {
             background: #fff;
             border: 1.5px solid #e8ddd5;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 1.4rem 1.6rem;
-            font-size: 1.4rem;
-            color: #3d2b1f;
+            margin-bottom: 1.2rem;
+            transition: box-shadow 0.2s;
         }
-        .glow-confirm-title, .glow-recibo-title {
-            font-size: 1.6rem; font-weight: 700; margin: 0 0 0.6rem; color: #3d2b1f;
+        .compra-card:hover { box-shadow: 0 4px 18px rgba(89,56,45,0.09); }
+        .compra-card.estado-inactivo { opacity: 0.7; border-color: #e0e0e0; }
+        .compra-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.5rem;
         }
-        .glow-confirm-pkg { font-size: 1.5rem; font-weight: 600; color: #c9956a; margin: 0 0 0.8rem; }
-        .glow-confirm-details { list-style: none; padding: 0; margin: 0 0 0.8rem; }
-        .glow-confirm-details li { display: flex; justify-content: space-between; padding: 0.3rem 0;
-            border-bottom: 1px solid #f0e8e0; font-size: 1.3rem; }
-        .glow-confirm-nota { font-size: 1.2rem; color: #9a7060; font-style: italic; margin: 0.5rem 0 1rem; }
-        .glow-confirm-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
-        .glow-confirm-yes { font-size: 1.3rem !important; padding: 0.55rem 1.2rem !important; }
-        .glow-confirm-cancel {
-            background: transparent; border: 1.5px solid #e0d5cc; border-radius: 6px;
-            padding: 0.55rem 1.2rem; font-size: 1.3rem; color: #8a6550; cursor: pointer;
-            transition: background 0.15s;
+        .compra-folio { font-size: 1.2rem; color: #9a7060; font-family: monospace; }
+        .compra-estado {
+            font-size: 1.1rem; font-weight: 700; padding: 0.2rem 0.8rem;
+            border-radius: 20px; letter-spacing: 0.04em;
         }
-        .glow-confirm-cancel:hover { background: #f5ede5; }
-        .glow-confirm-msg { min-height: 1.5rem; font-size: 1.2rem; margin-top: 0.5rem; }
-        /* ── Receipt ──────────────────────────────────────────────────────────── */
-        .glow-recibo-check { font-size: 2.4rem; color: #2d6a4f; margin-bottom: 0.3rem; }
-        .glow-recibo-grid {
-            display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.2rem;
-            font-size: 1.3rem; margin: 0.8rem 0;
+        .estado-activo .compra-estado { background: #d4edda; color: #155724; }
+        .estado-inactivo .compra-estado { background: #fde8cc; color: #7a4a10; }
+        .compra-nombre { font-size: 1.8rem; font-weight: 700; color: #c9956a; margin: 0.3rem 0 0.9rem; }
+        .compra-detalle {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.6rem 1rem;
         }
-        .glow-recibo-grid span { color: #9a7060; }
-        .glow-recibo-grid strong { color: #3d2b1f; }
-        .glow-recibo-link { font-size: 1.3rem; color: #2d6a4f; margin-top: 0.8rem; }
+        .compra-detalle > div { font-size: 1.3rem; }
+        .compra-detalle span { display: block; color: #9a7060; font-size: 1.1rem; text-transform: uppercase;
+            letter-spacing: 0.06em; }
+        .compra-detalle strong { color: #3d2b1f; }
+        .compras-vacio { text-align: center; color: #9a7060; font-size: 1.5rem; padding: 3rem 0; }
     </style>
-
 </head>
 <body>
     <header>
@@ -71,18 +64,15 @@
 
     <div class="nav-bg">
         <nav class="navegacion-principal">
-
             <div class="contenedor-logo">
                 <a href="index.html">Glow Studio</a>
             </div>
-            
             <div class="menu">
                 <a href="clases.html">Clases</a>
                 <a href="paquetes.html">Paquetes</a>
                 <a href="disciplinas.html">Disciplinas</a>
                 <a href="contacto.html">Contacto</a>
             </div>
-
             <div class="img-logo">
                 <a id="nav-user-link" href="login.html">
                     <picture>
@@ -90,7 +80,6 @@
                         <img src="../IMG/usuario.png" alt="Logo usuario" loading="lazy">
                     </picture>
                 </a>
-                
                 <a href="https://www.instagram.com/neyra_lop?igsh=a3dhZzMzbnRkN2c4" target="_blank" rel="noopener noreferrer" loading="lazy">
                     <picture>
                         <source loading="lazy" srcset="../IMG/logo-instagram.webp" type="image/webp">
@@ -98,30 +87,27 @@
                     </picture>
                 </a>
             </div>
-
         </nav>
     </div>
 
     <main>
-        <section class="contenedor-paquetes">
-            <h2 class="centrar-texto">Paquetes</h2>
-            <div id="mis-paquetes-section"></div>
-            <div class="paquetes" id="paquetes-container"></div>
-        </section>
+        <div class="compras-wrap">
+            <h2 class="compras-titulo">Mis compras</h2>
+            <div id="mis-paquetes-container"><p class="compras-vacio">Cargando...</p></div>
+        </div>
     </main>
 
     <footer class="footer">
         <nav>
             <a href="#">Contacto</a>
-            <a href="#">Paquetes</a>
-            <a href="#">Terminos y condiciones de privacidad</a>
+            <a href="paquetes.html">Paquetes</a>
+            <a href="#">Términos y condiciones de privacidad</a>
         </nav>
-
     </footer>
 
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/paquetes.js"></script>
+    <script src="../js/mis-paquetes.js"></script>
     <script>Auth.updateNavAuthState();</script>
 </body>
 </html>

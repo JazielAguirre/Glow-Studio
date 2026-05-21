@@ -389,8 +389,125 @@ async function reactivarAdminPaquete(req, res) {
     }
 }
 
+// ── User management ───────────────────────────────────────────────────────────
+
+async function usuarioDetalle(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de usuario inválido' });
+    }
+    try {
+        const detalle = await adminService.getUsuarioDetalle(id);
+        if (!detalle) {
+            return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+        }
+        return res.json({ ok: true, ...detalle });
+    } catch (err) {
+        console.error('[admin] usuario-detalle error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function cambiarRolHandler(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de usuario inválido' });
+    }
+    const { tipo_usuario } = req.body;
+    if (!tipo_usuario || !['usuario', 'admin'].includes(tipo_usuario)) {
+        return res.status(400).json({ ok: false, error: 'tipo_usuario debe ser "usuario" o "admin"' });
+    }
+    if (req.user.id_usuario === id) {
+        return res.status(400).json({ ok: false, error: 'No puedes cambiar tu propio rol' });
+    }
+    try {
+        const { pool } = require('../config/db');
+
+        const targetRes = await pool.query(
+            'SELECT tipo_usuario FROM usuarios WHERE id_usuario = $1',
+            [id]
+        );
+        if (!targetRes.rows.length) {
+            return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+        }
+
+        if (targetRes.rows[0].tipo_usuario === 'admin' && tipo_usuario === 'usuario') {
+            const countRes = await pool.query(
+                "SELECT COUNT(*)::int AS cnt FROM usuarios WHERE tipo_usuario = 'admin' AND estado = 'activo'"
+            );
+            if (countRes.rows[0].cnt <= 1) {
+                return res.status(400).json({ ok: false, error: 'No se puede degradar al único administrador activo' });
+            }
+        }
+
+        const usuario = await adminService.cambiarRolUsuario(id, tipo_usuario);
+        return res.json({ ok: true, usuario });
+    } catch (err) {
+        console.error('[admin] cambiar-rol error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function deshabilitarUsuarioHandler(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de usuario inválido' });
+    }
+    if (req.user.id_usuario === id) {
+        return res.status(400).json({ ok: false, error: 'No puedes deshabilitarte a ti mismo' });
+    }
+    try {
+        const { pool } = require('../config/db');
+
+        const targetRes = await pool.query(
+            'SELECT tipo_usuario, estado FROM usuarios WHERE id_usuario = $1',
+            [id]
+        );
+        if (!targetRes.rows.length) {
+            return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+        }
+        const target = targetRes.rows[0];
+
+        if (target.tipo_usuario === 'admin' && target.estado === 'activo') {
+            const countRes = await pool.query(
+                "SELECT COUNT(*)::int AS cnt FROM usuarios WHERE tipo_usuario = 'admin' AND estado = 'activo'"
+            );
+            if (countRes.rows[0].cnt <= 1) {
+                return res.status(400).json({ ok: false, error: 'No se puede deshabilitar al único administrador activo' });
+            }
+        }
+
+        const usuario = await adminService.deshabilitarUsuario(id);
+        if (!usuario) {
+            return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+        }
+        return res.json({ ok: true, usuario });
+    } catch (err) {
+        console.error('[admin] deshabilitar-usuario error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
+async function reactivarUsuarioHandler(req, res) {
+    const id = parseInt(req.params.id, 10);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ ok: false, error: 'ID de usuario inválido' });
+    }
+    try {
+        const usuario = await adminService.reactivarUsuario(id);
+        if (!usuario) {
+            return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+        }
+        return res.json({ ok: true, usuario });
+    } catch (err) {
+        console.error('[admin] reactivar-usuario error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+}
+
 module.exports = {
     dashboard, usuarios, paquetes, reservas, clasesOcupacion, contactos, revisarContacto,
     tiposClase, adminClases, crearClase, actualizarClase, deshabilitarClase, reactivarClase,
     paquetesCatalogo, crearAdminPaquete, actualizarAdminPaquete, deshabilitarAdminPaquete, reactivarAdminPaquete,
+    usuarioDetalle, cambiarRolHandler, deshabilitarUsuarioHandler, reactivarUsuarioHandler,
 };
