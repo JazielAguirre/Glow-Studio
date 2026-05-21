@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    var container = document.getElementById("paquetes-container");
+    var container     = document.getElementById("paquetes-container");
     var balanceSection = document.getElementById("mis-paquetes-section");
     if (!container) return;
 
     var isLoggedIn = window.Auth && window.Auth.isLoggedIn();
-    var token = isLoggedIn ? window.Auth.getToken() : null;
+    var token      = isLoggedIn ? window.Auth.getToken() : null;
 
     function escapeText(v) {
         return String(v !== null && v !== undefined ? v : '')
@@ -16,22 +16,31 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (!balanceSection || !isLoggedIn) return;
         try {
             var res = await window.GlowAPI.getMisPaquetes(token);
-            if (!res.ok || !res.paquetes.length) {
-                balanceSection.innerHTML = "<p class=\"centrar-texto\">No tienes paquetes activos. " +
-                    "<a href=\"mis-paquetes.html\">Ver historial</a></p>";
+            if (!res.ok || !res.paquetes || !res.paquetes.length) {
+                balanceSection.innerHTML =
+                    '<p style="text-align:center;color:#8c7168;font-size:1.4rem;margin:0 0 1.4rem;">' +
+                    'No tienes paquetes activos. Adquiere uno para empezar a reservar.' +
+                    '</p>';
                 return;
             }
-            var html = "<p class=\"centrar-texto\"><strong>Tus paquetes activos:</strong> " +
-                "<a href=\"mis-paquetes.html\" style=\"font-size:1.3rem;\">Ver historial completo</a></p>" +
-                "<ul class=\"centrar-texto\">";
-            res.paquetes.forEach(function (p) {
-                html += "<li>" + escapeText(p.nombre) + " &mdash; " + p.clases_restantes +
-                    " clase(s) restante(s), vence " + p.fecha_expiracion + "</li>";
-            });
-            html += "</ul>";
-            balanceSection.innerHTML = html;
+            var chips = res.paquetes.map(function (p) {
+                return '<div class="balance-chip">' +
+                    escapeText(p.nombre) +
+                    ' &mdash; <strong>' + p.clases_restantes + ' clase(s)</strong>' +
+                    ', vence <strong>' + escapeText(p.fecha_expiracion) + '</strong>' +
+                    '</div>';
+            }).join('');
+            balanceSection.innerHTML =
+                '<div class="balance-wrap">' +
+                '<p class="balance-heading">Tus paquetes activos</p>' +
+                '<div class="balance-chips">' + chips + '</div>' +
+                '<div class="balance-actions">' +
+                '<a href="mis-paquetes.html" class="balance-link">Ver historial</a>' +
+                '<a href="clases.html" class="balance-link">Reservar clase</a>' +
+                '</div>' +
+                '</div>';
         } catch (_) {
-            balanceSection.innerHTML = "";
+            balanceSection.innerHTML = '';
         }
     }
 
@@ -52,10 +61,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             '<li><span>Precio</span><strong>' + precio + '</strong></li>' +
             '<li><span>Vigencia</span><strong>' + paquete.vigencia_dias + ' días</strong></li>' +
             '</ul>' +
-            '<p class="glow-confirm-nota">Pago demo · sin cargo real</p>' +
+            '<p class="glow-confirm-nota">📋 Compra demo · sin cargo real · académico</p>' +
             '<div class="glow-confirm-actions">' +
-            '<button class="glow-confirm-yes reserve-btn">Confirmar compra demo</button>' +
-            '<button class="glow-confirm-cancel">Cancelar</button>' +
+            '<button class="glow-confirm-yes reserve-btn" type="button">Confirmar compra demo</button>' +
+            '<button class="glow-confirm-cancel" type="button">Cancelar</button>' +
             '</div>' +
             '<p class="glow-confirm-msg"></p>' +
             '</div>';
@@ -74,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         yesBtn.addEventListener('click', async function () {
             yesBtn.disabled = true;
-            noBtn.disabled = true;
+            noBtn.disabled  = true;
             yesBtn.textContent = 'Procesando...';
             try {
                 var res = await window.GlowAPI.comprarPaquete(paquete.id_paquete, token);
@@ -93,44 +102,44 @@ document.addEventListener("DOMContentLoaded", async function () {
                         '<span>Paquete</span><strong>' + escapeText(up.nombre || paquete.nombre) + '</strong>' +
                         '<span>Precio</span><strong>' + precioRec + '</strong>' +
                         '<span>Clases</span><strong>' + (up.cantidad_clases || up.clases_restantes) + '</strong>' +
-                        '<span>Vence</span><strong>' + (up.fecha_expiracion || '—') + '</strong>' +
-                        '<span>Fecha</span><strong>' + (up.fecha_inicio || '—') + '</strong>' +
+                        '<span>Vence</span><strong>' + escapeText(up.fecha_expiracion || '—') + '</strong>' +
                         '</div>' +
-                        '<p class="glow-recibo-link">Ya puedes reservar clases. ' +
-                        '<a href="mis-paquetes.html">Ver mis compras</a></p>' +
+                        '<div class="glow-recibo-actions">' +
+                        '<a href="clases.html" class="glow-recibo-btn glow-recibo-btn-primary">Reservar una clase →</a>' +
+                        '<a href="mis-paquetes.html" class="glow-recibo-btn glow-recibo-btn-secondary">Ver mis paquetes</a>' +
+                        '</div>' +
                         '</div>';
 
                     await renderBalance();
                 } else {
-                    yesBtn.disabled = false;
-                    noBtn.disabled = false;
+                    yesBtn.disabled    = false;
+                    noBtn.disabled     = false;
                     yesBtn.textContent = 'Confirmar compra demo';
-                    msgEl.textContent = res.message || 'No se pudo adquirir el paquete.';
-                    msgEl.style.color = '#c0392b';
+                    msgEl.textContent  = res.message || 'No se pudo adquirir el paquete.';
+                    msgEl.style.color  = '#c0392b';
                 }
             } catch (_) {
-                yesBtn.disabled = false;
-                noBtn.disabled = false;
+                yesBtn.disabled    = false;
+                noBtn.disabled     = false;
                 yesBtn.textContent = 'Confirmar compra demo';
-                msgEl.textContent = 'Error de conexión. Intenta de nuevo.';
-                msgEl.style.color = '#c0392b';
+                msgEl.textContent  = 'Error de conexión. Intenta de nuevo.';
+                msgEl.style.color  = '#c0392b';
             }
         });
     }
 
     function buildBtn(paquete) {
         if (!isLoggedIn) {
-            var a = document.createElement("a");
-            a.href = "login.html";
-            a.className = "reserve-btn";
-            a.textContent = "Iniciar sesión";
+            var a = document.createElement('a');
+            a.href = 'login.html';
+            a.className = 'reserve-btn';
+            a.textContent = 'Iniciar sesión';
             return a;
         }
-
-        var btn = document.createElement("button");
-        btn.className = "reserve-btn";
-        btn.textContent = "Adquirir paquete";
-        btn.addEventListener("click", function () {
+        var btn = document.createElement('button');
+        btn.className = 'reserve-btn';
+        btn.textContent = 'Adquirir paquete';
+        btn.addEventListener('click', function () {
             showConfirmation(paquete, btn.closest('.paquete'), btn);
         });
         return btn;
@@ -139,47 +148,56 @@ document.addEventListener("DOMContentLoaded", async function () {
     function renderPaquetes(paquetes) {
         var fragment = document.createDocumentFragment();
         paquetes.forEach(function (p) {
-            var card = document.createElement("div");
-            card.className = "paquete";
+            var card = document.createElement('div');
+            card.className = 'paquete';
 
-            var vigencia = document.createElement("h5");
-            vigencia.textContent = "Vigencia - " + p.vigencia_dias + " días";
+            var vigencia = document.createElement('h5');
+            vigencia.textContent = 'Vigencia · ' + p.vigencia_dias + ' días';
 
-            var nombre = document.createElement("h3");
+            var nombre = document.createElement('h3');
             nombre.textContent = p.nombre;
 
-            var flexMonto = document.createElement("div");
-            flexMonto.className = "flex-monto";
+            var flexMonto = document.createElement('div');
+            flexMonto.className = 'flex-monto';
 
-            var precio = document.createElement("h4");
-            precio.textContent = "$" + Number(p.precio).toLocaleString("es-MX") + " MXN";
+            var precio = document.createElement('h4');
+            precio.textContent = '$' + Number(p.precio).toLocaleString('es-MX') + ' MXN';
 
-            var arrow = document.createElement("span");
-            arrow.textContent = "⟶";
+            var arrow = document.createElement('span');
+            arrow.textContent = '⟶';
 
             flexMonto.appendChild(precio);
             flexMonto.appendChild(arrow);
             flexMonto.appendChild(buildBtn(p));
 
+            var demoNote = document.createElement('p');
+            demoNote.className = 'pkg-demo-note';
+            demoNote.textContent = 'Compra demo · sin cargo real';
+
             card.appendChild(vigencia);
             card.appendChild(nombre);
             card.appendChild(flexMonto);
+            if (isLoggedIn) card.appendChild(demoNote);
             fragment.appendChild(card);
         });
-        container.innerHTML = "";
+        container.innerHTML = '';
         container.appendChild(fragment);
     }
 
+    // ── Load ──────────────────────────────────────────────────────────────────
+    container.innerHTML = '<p style="text-align:center;color:#8c7168;font-size:1.4rem;padding:2rem 0;">Cargando paquetes...</p>';
     try {
         var data = await window.GlowAPI.getPaquetes();
-        if (data && data.ok) {
+        if (data && data.ok && data.paquetes.length) {
             renderPaquetes(data.paquetes);
+        } else if (data && data.ok) {
+            container.innerHTML = '<p style="text-align:center;color:#8c7168;font-size:1.5rem;padding:3rem 0;">No hay paquetes disponibles en este momento.</p>';
         } else {
-            container.innerHTML = "<p class=\"centrar-texto\">No se pudieron cargar los paquetes.</p>";
+            container.innerHTML = '<p style="text-align:center;color:#c0392b;font-size:1.4rem;padding:2rem 0;">No se pudieron cargar los paquetes. Verifica tu conexión.</p>';
         }
         await renderBalance();
     } catch (err) {
-        container.innerHTML = "<p class=\"centrar-texto\">No se pudo conectar con el servidor.</p>";
-        console.warn("[paquetes] Error:", err);
+        container.innerHTML = '<p style="text-align:center;color:#c0392b;font-size:1.4rem;padding:2rem 0;">No se pudo conectar con el servidor.</p>';
+        console.warn('[paquetes] Error:', err);
     }
 });
