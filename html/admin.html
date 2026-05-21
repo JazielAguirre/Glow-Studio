@@ -22,143 +22,388 @@
     <link rel="stylesheet" href="../css/style.css">
 
     <style>
-        /* ── Dashboard metrics grid ──────────────────────────────────────────── */
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-        .admin-card { background: #fff; border: 1px solid #e8ddd5; border-radius: 10px; padding: 1.6rem 1.2rem; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
-        .admin-card:hover { box-shadow: 0 4px 18px rgba(89,56,45,0.1); transform: translateY(-2px); }
-        .admin-card .valor { font-size: 2.2rem; font-weight: 700; color: #c9956a; }
-        .admin-card .etiqueta { font-size: 1.2rem; color: #9a7060; margin-top: 0.45rem; text-transform: uppercase; letter-spacing: 0.07em; }
+        /* ─────────────────────────────────────────────────────────────────────
+           Glow Studio Admin — Boutique Wellness Dashboard
+           Palette: warm cream canvas · Playfair Display headings · terracotta accent
+        ───────────────────────────────────────────────────────────────────── */
+        :root {
+            --gs-cream:     #faf8f5;
+            --gs-white:     #ffffff;
+            --gs-border:    #ede8e2;
+            --gs-border-alt:#e0d5cc;
+            --gs-accent:    #c9956a;
+            --gs-accent-lt: #f5ede5;
+            --gs-brown:     #2d1f17;
+            --gs-brown-md:  #3d2b1f;
+            --gs-muted:     #8c7168;
+            --gs-muted-lt:  #b09080;
+            --gs-sage:      #4a7c5f;
+            --gs-shadow:    rgba(45,31,23,0.08);
+        }
 
-        /* ── Sections ─────────────────────────────────────────────────────────── */
-        .admin-section { margin: 2.8rem 0; }
-        .admin-section h2 { border-bottom: 2px solid #e8d5c4; padding-bottom: 0.6rem; margin-bottom: 0.6rem; color: #3d2b1f; }
-        .admin-section-desc { color: #9a7060; font-size: 1.2rem; margin: 0 0 1.4rem; }
-        .admin-subtitle { color: #9a7060; font-size: 1.3rem; margin: 0.3rem 0 1.5rem; }
-        .admin-subsection-title { font-size: 1.15rem; color: #b09080; font-weight: 700; margin: 1.8rem 0 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; }
-
-        /* ── Admin nav pills ─────────────────────────────────────────────────── */
-        .admin-nav { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 2rem; justify-content: center; }
-        .admin-nav a { padding: 0.45rem 1.2rem; border: 1.5px solid #e0d5cc; border-radius: 20px; font-size: 1.3rem; font-weight: 600; color: #7a5a48; text-decoration: none; letter-spacing: 0.02em; transition: background 0.15s, border-color 0.15s, color 0.15s; }
-        .admin-nav a:hover { background: #f5ede5; border-color: #c9956a; color: #3d2b1f; }
-
-        /* ── Tables ─────────────────────────────────────────────────────────── */
-        .admin-table { width: 100%; border-collapse: collapse; font-size: 1.3rem; }
-        .admin-table th { background: #fdf8f4; text-align: left; padding: 0.85rem 1rem; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9a7060; border-bottom: 2px solid #e8d5c4; }
-        .admin-table td { padding: 0.85rem 1rem; border-bottom: 1px solid #f0e8e0; vertical-align: middle; }
-        .admin-table tr:last-child td { border-bottom: none; }
-        .admin-table tbody tr { transition: background 0.1s; }
-        .admin-table tbody tr:hover td { background: #fdf8f4; }
-        [id$="-wrap"] { overflow-x: auto; }
-
-        /* ── Badges ──────────────────────────────────────────────────────────── */
-        .badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.03em; }
-        .badge-activa, .badge-activo, .badge-nuevo  { background: #d4edda; color: #155724; }
-        .badge-cancelada, .badge-vencido            { background: #f8d7da; color: #721c24; }
-        .badge-revisado, .badge-usuario             { background: #e2e3e5; color: #383d41; }
-        .badge-admin                                { background: #fff3cd; color: #856404; }
-        .badge-inactiva                             { background: #fde8cc; color: #7a4a10; }
+        /* ── Page background ─────────────────────────────────────────────────── */
+        body { background: var(--gs-cream); }
 
         /* ── Access denied ───────────────────────────────────────────────────── */
-        #acceso-denegado { display: none; padding: 3rem; text-align: center; color: #c0392b; }
+        #acceso-denegado { display: none; padding: 4rem 2rem; text-align: center; color: #c0392b; }
 
-        /* ── Class management — form card ────────────────────────────────────── */
-        .clase-form {
-            background: #fff;
-            border: 1px solid #e8ddd5;
-            border-radius: 12px;
-            padding: 1.5rem 1.6rem 1.2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 16px rgba(89,56,45,0.07), 0 0 0 1px rgba(201,149,106,0.05);
+        /* ═══════════════════════════════════════════════════════════════════════
+           LANDING DASHBOARD
+        ═══════════════════════════════════════════════════════════════════════ */
+        .admin-landing {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
         }
-        .clase-form-row { display: flex; flex-wrap: wrap; gap: 1rem 1.3rem; align-items: flex-end; }
+
+        /* Hero */
+        .admin-hero {
+            text-align: center;
+            padding: 2.5rem 0 2rem;
+            border-bottom: 1px solid var(--gs-border);
+            margin-bottom: 3rem;
+        }
+        .admin-hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.8rem, 5vw, 4.2rem);
+            font-weight: 700;
+            color: var(--gs-brown);
+            letter-spacing: -0.01em;
+            margin: 0 0 0.6rem;
+            line-height: 1.15;
+        }
+        .admin-hero-sub {
+            font-size: 1.5rem;
+            color: var(--gs-muted);
+            margin: 0;
+            font-weight: 400;
+        }
+
+        /* Metrics grid */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 0 0 3.5rem;
+        }
+        .admin-card {
+            background: var(--gs-white);
+            border: 1.5px solid var(--gs-border);
+            border-radius: 14px;
+            padding: 1.8rem 1.2rem;
+            text-align: center;
+            transition: box-shadow 0.22s, transform 0.22s;
+        }
+        .admin-card:hover { box-shadow: 0 6px 24px var(--gs-shadow); transform: translateY(-3px); }
+        .admin-card .valor { font-size: 2.4rem; font-weight: 700; color: var(--gs-accent); font-family: 'Playfair Display', serif; }
+        .admin-card .etiqueta { font-size: 1.1rem; color: var(--gs-muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+        /* Module section heading */
+        .admin-modules-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--gs-brown);
+            margin: 0 0 1.6rem;
+            letter-spacing: -0.01em;
+        }
+
+        /* Module card grid */
+        .admin-module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.4rem;
+        }
+
+        /* Individual module card */
+        .admin-module-card {
+            background: var(--gs-white);
+            border: 1.5px solid var(--gs-border);
+            border-radius: 18px;
+            padding: 2rem 1.8rem 1.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            transition: box-shadow 0.22s, transform 0.22s, border-color 0.22s;
+            cursor: default;
+        }
+        .admin-module-card:hover {
+            box-shadow: 0 8px 32px var(--gs-shadow);
+            transform: translateY(-4px);
+            border-color: var(--gs-accent);
+        }
+        .admin-module-card.is-active {
+            border-color: var(--gs-accent);
+            box-shadow: 0 0 0 3px rgba(201,149,106,0.18);
+        }
+        .admin-module-icon {
+            font-size: 2.6rem;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+        .admin-module-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--gs-brown-md);
+            margin: 0;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+        .admin-module-desc {
+            font-size: 1.3rem;
+            color: var(--gs-muted);
+            margin: 0;
+            line-height: 1.5;
+            flex: 1;
+        }
+        .admin-module-open {
+            align-self: flex-start;
+            margin-top: 0.4rem;
+            background: none;
+            border: 1.5px solid var(--gs-accent);
+            color: var(--gs-accent);
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 0.5rem 1.4rem;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 0.03em;
+            transition: background 0.18s, color 0.18s;
+        }
+        .admin-module-open:hover {
+            background: var(--gs-accent);
+            color: #fff;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           MODULE OVERLAY
+        ═══════════════════════════════════════════════════════════════════════ */
+        #admin-module-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            background: rgba(45,31,23,0.55);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            overflow-y: auto;
+            padding: 2.5vh 1.5rem;
+            animation: gsOverlayIn 0.22s ease;
+        }
+        #admin-module-overlay.is-open { display: flex; align-items: flex-start; justify-content: center; }
+        @keyframes gsOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .admin-module-dialog {
+            background: var(--gs-white);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1260px;
+            box-shadow: 0 24px 64px rgba(45,31,23,0.22);
+            display: flex;
+            flex-direction: column;
+            max-height: 92vh;
+            animation: gsDialogIn 0.24s cubic-bezier(0.34,1.3,0.64,1);
+            overflow: hidden;
+        }
+        @keyframes gsDialogIn {
+            from { transform: scale(0.96) translateY(12px); opacity: 0; }
+            to   { transform: scale(1)    translateY(0);    opacity: 1; }
+        }
+
+        /* Dialog header — sticky */
+        .admin-module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.8rem 2.4rem 1.4rem;
+            border-bottom: 1.5px solid var(--gs-border);
+            position: sticky;
+            top: 0;
+            background: var(--gs-white);
+            z-index: 10;
+            border-radius: 20px 20px 0 0;
+        }
+        .admin-module-header-text { flex: 1; min-width: 0; }
+        #admin-module-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--gs-brown);
+            margin: 0 0 0.2rem;
+            line-height: 1.15;
+        }
+        #admin-module-subtitle {
+            font-size: 1.3rem;
+            color: var(--gs-muted);
+            margin: 0;
+        }
+        .admin-module-close {
+            flex-shrink: 0;
+            width: 3.6rem;
+            height: 3.6rem;
+            border-radius: 50%;
+            border: 1.5px solid var(--gs-border-alt);
+            background: var(--gs-cream);
+            color: var(--gs-muted);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            line-height: 1;
+        }
+        .admin-module-close:hover {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f8d7da;
+        }
+
+        /* Dialog body — scrollable */
+        #admin-module-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 2.4rem 2.8rem;
+            overscroll-behavior: contain;
+        }
+
+        /* ── Sections inside pool/overlay ────────────────────────────────────── */
+        #admin-sections-pool { display: none; }
+
+        .admin-section { margin: 0 0 2.8rem; }
+        .admin-section:last-child { margin-bottom: 0; }
+        .admin-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gs-brown);
+            border-bottom: 2px solid var(--gs-border);
+            padding-bottom: 0.7rem;
+            margin-bottom: 0.8rem;
+        }
+        .admin-section-desc { color: var(--gs-muted); font-size: 1.3rem; margin: 0 0 1.6rem; }
+        .admin-subsection-title {
+            font-size: 1.1rem; color: var(--gs-muted-lt); font-weight: 700;
+            margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.09em;
+        }
+
+        /* ── Tables ──────────────────────────────────────────────────────────── */
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 1.3rem; }
+        .admin-table th {
+            background: var(--gs-cream); text-align: left;
+            padding: 0.9rem 1.1rem; font-weight: 700; font-size: 1.05rem;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            color: var(--gs-muted); border-bottom: 2px solid var(--gs-border);
+            position: sticky; top: 0;
+        }
+        .admin-table td { padding: 0.9rem 1.1rem; border-bottom: 1px solid #f3ede6; vertical-align: middle; }
+        .admin-table tr:last-child td { border-bottom: none; }
+        .admin-table tbody tr { transition: background 0.1s; }
+        .admin-table tbody tr:hover td { background: var(--gs-accent-lt); }
+        [id$="-wrap"] { overflow-x: auto; border-radius: 10px; border: 1.5px solid var(--gs-border); }
+
+        /* ── Badges ──────────────────────────────────────────────────────────── */
+        .badge { display: inline-block; padding: 0.28rem 0.75rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.03em; }
+        .badge-activa, .badge-activo, .badge-nuevo { background: #d4edda; color: #155724; }
+        .badge-cancelada, .badge-vencido           { background: #f8d7da; color: #721c24; }
+        .badge-revisado, .badge-usuario            { background: #e2e3e5; color: #383d41; }
+        .badge-admin                               { background: #fff3cd; color: #856404; }
+        .badge-inactiva, .badge-inactivo           { background: #fde8cc; color: #7a4a10; }
+
+        /* ── Class/package management form ───────────────────────────────────── */
+        .clase-form {
+            background: var(--gs-cream); border: 1.5px solid var(--gs-border);
+            border-radius: 14px; padding: 1.6rem 1.8rem 1.2rem; margin-bottom: 2rem;
+        }
+        .clase-form-row { display: flex; flex-wrap: wrap; gap: 1rem 1.4rem; align-items: flex-end; }
         .clase-form-field { display: flex; flex-direction: column; }
         .clase-form-field label {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #9a7060;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 0.45rem;
+            font-size: 1.05rem; font-weight: 700; color: var(--gs-muted);
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.45rem;
         }
         .clase-form-field input, .clase-form-field select {
-            padding: 0.6rem 0.9rem;
-            border: 1.5px solid #e0d5cc;
-            border-radius: 8px;
-            font-size: 1.4rem;
-            background: #fdfaf7;
-            color: #3d2b1f;
-            min-width: 148px;
-            transition: border-color 0.18s, box-shadow 0.18s, background 0.15s;
+            padding: 0.62rem 0.95rem; border: 1.5px solid var(--gs-border-alt);
+            border-radius: 8px; font-size: 1.4rem; background: var(--gs-white);
+            color: var(--gs-brown-md); min-width: 148px;
+            transition: border-color 0.18s, box-shadow 0.18s;
         }
         .clase-form-field input:focus, .clase-form-field select:focus {
-            outline: none;
-            border-color: #c9956a;
-            background: #fff;
+            outline: none; border-color: var(--gs-accent);
             box-shadow: 0 0 0 3px rgba(201,149,106,0.15);
         }
         .clase-form-actions { display: flex; gap: 0.5rem; align-items: flex-end; padding-bottom: 1px; }
-
-        /* Override global .boton sizing inside the form only */
-        .clase-form-actions .boton {
-            font-size: 1.3rem;
-            font-weight: 700;
-            padding: 0.6rem 1.6rem;
-            border-radius: 8px;
-            width: auto;
-            margin-top: 0;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-        #clase-cancel, #paquete-cancel {
-            background: transparent;
-            color: #8a6550;
-            border: 1.5px solid #e0d5cc;
-        }
-        #clase-cancel:hover, #paquete-cancel:hover { background: #f5ede5; color: #3d2b1f; border-color: #c9956a; }
+        .clase-form-actions .boton { font-size: 1.3rem; font-weight: 700; padding: 0.62rem 1.6rem; border-radius: 8px; width: auto; margin-top: 0; }
+        #clase-cancel, #paquete-cancel { background: transparent; color: var(--gs-muted); border: 1.5px solid var(--gs-border-alt); }
+        #clase-cancel:hover, #paquete-cancel:hover { background: var(--gs-accent-lt); color: var(--gs-brown-md); border-color: var(--gs-accent); }
         .clase-form-msg { margin-top: 0.9rem; font-size: 1.15rem; min-height: 1.3rem; font-weight: 500; }
 
-        /* ── Admin action buttons — pill system ──────────────────────────────── */
+        /* ── Action buttons in tables ─────────────────────────────────────────── */
         .admin-btn {
-            padding: 0.4rem 1.1rem;
-            border: none;
-            border-radius: 20px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            white-space: nowrap;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
+            padding: 0.38rem 1rem; border: none; border-radius: 20px;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+            letter-spacing: 0.04em; text-transform: uppercase;
             transition: filter 0.15s, transform 0.12s;
         }
-        .admin-btn:hover:not(:disabled) { filter: brightness(0.88); transform: translateY(-1px); }
-        .admin-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.82); }
-        .admin-btn-edit      { background: #d4edda; color: #155724; }
-        .admin-btn-disable   { background: #ffeeba; color: #7a5200; }
+        .admin-btn:hover:not(:disabled) { filter: brightness(0.87); transform: translateY(-1px); }
+        .admin-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.8); }
+        .admin-btn-edit       { background: #d4edda; color: #155724; }
+        .admin-btn-disable    { background: #ffeeba; color: #7a5200; }
         .admin-btn-reactivate { background: #cce5ff; color: #004085; }
-        .admin-btn:disabled  { opacity: 0.4; cursor: default; transform: none; filter: none; }
+        .admin-btn:disabled   { opacity: 0.4; cursor: default; transform: none; filter: none; }
 
-        /* ── Filter bar ──────────────────────────────────────────────────────── */
+        /* ── Filter bars ──────────────────────────────────────────────────────── */
         .admin-filtros-bar {
-            display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
-            padding: 1rem 1.2rem;
-            background: #fdfaf7;
-            border: 1px solid #e8ddd5;
-            border-radius: 10px;
-            box-shadow: 0 1px 6px rgba(89,56,45,0.05);
+            display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: flex-end;
+            padding: 1.2rem 1.4rem; background: var(--gs-cream);
+            border: 1.5px solid var(--gs-border); border-radius: 12px;
         }
-        .admin-filtros-bar input[type="text"],
-        .admin-filtros-bar select {
-            padding: 0.5rem 0.9rem; border: 1.5px solid #e0d5cc; border-radius: 8px;
-            font-size: 1.3rem; background: #fff; color: #3d2b1f;
-            transition: border-color 0.15s;
+        .admin-filtros-bar input[type="text"], .admin-filtros-bar select,
+        #reporte-disciplina, #reporte-paquete {
+            padding: 0.55rem 0.95rem; border: 1.5px solid var(--gs-border-alt);
+            border-radius: 8px; font-size: 1.3rem; background: var(--gs-white);
+            color: var(--gs-brown-md); transition: border-color 0.15s;
         }
-        .admin-filtros-bar input[type="text"]:focus,
-        .admin-filtros-bar select:focus { outline: none; border-color: #c9956a; }
+        .admin-filtros-bar input[type="text"]:focus, .admin-filtros-bar select:focus,
+        #reporte-disciplina:focus, #reporte-paquete:focus { outline: none; border-color: var(--gs-accent); }
         .admin-filtros-bar input[type="text"] { flex: 2; min-width: 200px; }
-        .admin-filtros-bar select { min-width: 140px; }
-        .admin-filtros-bar .boton {
-            font-size: 1.3rem; padding: 0.55rem 1.3rem; border-radius: 8px;
-            width: auto; margin-top: 0; letter-spacing: 0.03em;
+        .admin-filtros-bar select, #reporte-disciplina, #reporte-paquete { min-width: 140px; }
+        .admin-filtros-bar .boton { font-size: 1.3rem; padding: 0.55rem 1.3rem; border-radius: 8px; width: auto; margin-top: 0; }
+
+        /* ── User detail card ─────────────────────────────────────────────────── */
+        .admin-detalle-card {
+            background: var(--gs-cream); border: 1.5px solid var(--gs-border);
+            border-radius: 14px; padding: 1.6rem 1.8rem 1.3rem; margin-top: 1.6rem;
+        }
+        .admin-detalle-meta { display: flex; flex-wrap: wrap; gap: 0.6rem 2rem; font-size: 1.3rem; margin-bottom: 1rem; color: var(--gs-brown-md); }
+        .admin-detalle-resumen { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 0.5rem; }
+        .admin-detalle-stat { background: var(--gs-white); border: 1.5px solid var(--gs-border); border-radius: 10px; padding: 0.5rem 1.1rem; font-size: 1.2rem; color: #7a5a48; }
+        .admin-detalle-stat strong { color: var(--gs-accent); font-size: 1.5rem; }
+
+        /* ── Report date inputs (inline style overrides consolidated here) ────── */
+        #reporte-fecha-inicio, #reporte-fecha-fin {
+            font-size: 1.3rem; padding: 0.55rem 0.9rem;
+            border: 1.5px solid var(--gs-border-alt); border-radius: 8px;
+            background: var(--gs-white); color: var(--gs-brown-md);
+        }
+        #reporte-fecha-inicio:focus, #reporte-fecha-fin:focus { outline: none; border-color: var(--gs-accent); }
+        #reporte-estado-reserva {
+            font-size: 1.3rem; padding: 0.55rem 0.9rem;
+            border: 1.5px solid var(--gs-border-alt); border-radius: 8px;
+            background: var(--gs-white); color: var(--gs-brown-md); min-width: 155px;
+        }
+
+        /* ── Responsive: small screens ───────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .admin-module-grid { grid-template-columns: 1fr; }
+            .admin-module-dialog { border-radius: 14px; }
+            #admin-module-body { padding: 1.4rem 1.2rem 2rem; }
+            .admin-module-header { padding: 1.4rem 1.4rem 1rem; }
+            #admin-module-title { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -196,7 +441,7 @@
         </nav>
     </div>
 
-    <main class="contenedor">
+    <main>
 
         <div id="acceso-denegado">
             <h2>Acceso denegado</h2>
@@ -206,141 +451,233 @@
 
         <div id="admin-contenido" style="display:none;">
 
-            <section class="admin-section">
-                <h2 class="centrar-texto">Panel de Administración</h2>
-                <p class="centrar-texto admin-subtitle">Resumen general del estudio, reservas, paquetes, usuarios y mensajes de contacto.</p>
-                <nav class="admin-nav">
-                    <a href="#admin-gestion-clases">Gestión de clases</a>
-                    <a href="#admin-gestion-paquetes">Gestión de paquetes</a>
-                    <a href="#admin-usuarios">Usuarios</a>
-                    <a href="#admin-paquetes">Paquetes</a>
-                    <a href="#admin-reservas">Reservas</a>
-                    <a href="#admin-ocupacion">Ocupación</a>
-                    <a href="#admin-contactos">Contactos</a>
-                </nav>
+            <!-- ── Landing dashboard ──────────────────────────────────────────── -->
+            <div class="admin-landing">
+                <div class="admin-hero">
+                    <h2 class="admin-hero-title">Panel de Administración</h2>
+                    <p class="admin-hero-sub">Gestión del estudio Glow Studio</p>
+                </div>
+
                 <p class="admin-subsection-title">Resumen general</p>
                 <div class="admin-grid" id="admin-dashboard"></div>
-            </section>
 
-            <section class="admin-section" id="admin-gestion-clases">
-                <h2>Gestión de clases</h2>
-                <p class="admin-section-desc">Crear, editar, deshabilitar y reactivar clases del estudio.</p>
+                <p class="admin-modules-heading">Módulos de administración</p>
+                <div class="admin-module-grid">
 
-                <p class="admin-subsection-title">Nueva clase / Editar clase</p>
-                <div class="clase-form">
-                    <div class="clase-form-row">
-                        <div class="clase-form-field">
-                            <label for="clase-id-tipo">Disciplina</label>
-                            <select id="clase-id-tipo"></select>
-                        </div>
-                        <div class="clase-form-field">
-                            <label for="clase-fecha">Fecha</label>
-                            <input id="clase-fecha" type="date">
-                        </div>
-                        <div class="clase-form-field">
-                            <label for="clase-hora-inicio">Hora inicio</label>
-                            <input id="clase-hora-inicio" type="time">
-                        </div>
-                        <div class="clase-form-field">
-                            <label for="clase-hora-fin">Hora fin</label>
-                            <input id="clase-hora-fin" type="time">
-                        </div>
-                        <div class="clase-form-actions">
-                            <button id="clase-submit" type="button" class="boton">Guardar</button>
-                            <button id="clase-cancel" type="button" class="boton" style="display:none;">Cancelar</button>
-                        </div>
+                    <div class="admin-module-card" data-module="usuarios">
+                        <div class="admin-module-icon">👥</div>
+                        <h3 class="admin-module-title">Usuarios</h3>
+                        <p class="admin-module-desc">Ver cuentas, cambiar roles, deshabilitar y reactivar usuarios.</p>
+                        <button class="admin-module-open" type="button">Abrir →</button>
                     </div>
-                    <p id="clase-form-msg" class="clase-form-msg"></p>
-                </div>
 
-                <p class="admin-subsection-title">Todas las clases</p>
-                <div id="tabla-clases-wrap"></div>
-            </section>
-
-            <section class="admin-section" id="admin-gestion-paquetes">
-                <h2>Gestión de paquetes</h2>
-                <p class="admin-section-desc">Crear, editar, deshabilitar y reactivar paquetes del catálogo.</p>
-
-                <p class="admin-subsection-title">Nuevo paquete / Editar paquete</p>
-                <div class="clase-form">
-                    <div class="clase-form-row">
-                        <div class="clase-form-field">
-                            <label for="paquete-nombre">Nombre</label>
-                            <input id="paquete-nombre" type="text" placeholder="Ej. 10 Clases" style="min-width:180px;">
-                        </div>
-                        <div class="clase-form-field">
-                            <label for="paquete-clases">Clases</label>
-                            <input id="paquete-clases" type="number" min="1" placeholder="10">
-                        </div>
-                        <div class="clase-form-field">
-                            <label for="paquete-precio">Precio ($)</label>
-                            <input id="paquete-precio" type="number" min="0" step="0.01" placeholder="999.00">
-                        </div>
-                        <div class="clase-form-field">
-                            <label for="paquete-vigencia">Vigencia (días)</label>
-                            <input id="paquete-vigencia" type="number" min="1" placeholder="30">
-                        </div>
-                        <div class="clase-form-actions">
-                            <button id="paquete-submit" type="button" class="boton">Guardar</button>
-                            <button id="paquete-cancel" type="button" class="boton" style="display:none;">Cancelar</button>
-                        </div>
+                    <div class="admin-module-card" data-module="clases">
+                        <div class="admin-module-icon">🗓</div>
+                        <h3 class="admin-module-title">Clases</h3>
+                        <p class="admin-module-desc">Crear, editar, deshabilitar y reactivar clases programadas.</p>
+                        <button class="admin-module-open" type="button">Abrir →</button>
                     </div>
-                    <p id="paquete-form-msg" class="clase-form-msg"></p>
+
+                    <div class="admin-module-card" data-module="paquetes">
+                        <div class="admin-module-icon">📦</div>
+                        <h3 class="admin-module-title">Paquetes</h3>
+                        <p class="admin-module-desc">Gestión del catálogo: precio, vigencia y disponibilidad.</p>
+                        <button class="admin-module-open" type="button">Abrir →</button>
+                    </div>
+
+                    <div class="admin-module-card" data-module="reportes">
+                        <div class="admin-module-icon">📊</div>
+                        <h3 class="admin-module-title">Reportes</h3>
+                        <p class="admin-module-desc">Filtros por fecha, métricas del período y exportación a CSV.</p>
+                        <button class="admin-module-open" type="button">Abrir →</button>
+                    </div>
+
+                    <div class="admin-module-card" data-module="historial">
+                        <div class="admin-module-icon">📋</div>
+                        <h3 class="admin-module-title">Reservas e historial</h3>
+                        <p class="admin-module-desc">Paquetes adquiridos, reservas activas y ocupación por clase.</p>
+                        <button class="admin-module-open" type="button">Abrir →</button>
+                    </div>
+
+                    <div class="admin-module-card" data-module="contactos">
+                        <div class="admin-module-icon">✉️</div>
+                        <h3 class="admin-module-title">Contactos</h3>
+                        <p class="admin-module-desc">Mensajes del formulario de contacto y seguimiento de estado.</p>
+                        <button class="admin-module-open" type="button">Abrir →</button>
+                    </div>
+
                 </div>
+            </div>
 
-                <p class="admin-subsection-title">Catálogo de paquetes</p>
-                <div id="tabla-paquetes-catalogo-wrap"></div>
-            </section>
-
-            <section class="admin-section" id="admin-filtros">
-                <p class="admin-subsection-title">Filtros de búsqueda</p>
-                <div class="admin-filtros-bar">
-                    <input id="filtro-busqueda" type="text" placeholder="Buscar en todas las tablas...">
-                    <select id="filtro-contactos">
-                        <option value="todos">Contactos: Todos</option>
-                        <option value="nuevo">Nuevo</option>
-                        <option value="revisado">Revisado</option>
-                    </select>
-                    <select id="filtro-reservas">
-                        <option value="todas">Reservas: Todas</option>
-                        <option value="activa">Activa</option>
-                        <option value="cancelada">Cancelada</option>
-                    </select>
-                    <button id="filtro-limpiar" type="button" class="boton">Limpiar filtros</button>
+            <!-- ── Module overlay ─────────────────────────────────────────────── -->
+            <div id="admin-module-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-module-title">
+                <div class="admin-module-dialog">
+                    <div class="admin-module-header">
+                        <div class="admin-module-header-text">
+                            <h2 id="admin-module-title"></h2>
+                            <p id="admin-module-subtitle"></p>
+                        </div>
+                        <button class="admin-module-close" id="admin-module-close" aria-label="Cerrar módulo">✕</button>
+                    </div>
+                    <div id="admin-module-body"></div>
                 </div>
-            </section>
+            </div>
 
-            <section class="admin-section" id="admin-usuarios">
-                <h2>Usuarios registrados</h2>
-                <p class="admin-section-desc">Personas registradas en el sistema.</p>
-                <div id="tabla-usuarios-wrap"></div>
-            </section>
+            <!-- ── Hidden sections pool (JS populates these; moved into overlay on open) ── -->
+            <div id="admin-sections-pool" aria-hidden="true">
 
-            <section class="admin-section" id="admin-paquetes">
-                <h2>Paquetes adquiridos</h2>
-                <p class="admin-section-desc">Paquetes adquiridos por los usuarios e ingresos estimados.</p>
-                <div id="tabla-paquetes-wrap"></div>
-            </section>
+                <section class="admin-section" id="admin-gestion-clases">
+                    <h2>Gestión de clases</h2>
+                    <p class="admin-section-desc">Crear, editar, deshabilitar y reactivar clases del estudio.</p>
+                    <p class="admin-subsection-title">Nueva clase / Editar clase</p>
+                    <div class="clase-form">
+                        <div class="clase-form-row">
+                            <div class="clase-form-field">
+                                <label for="clase-id-tipo">Disciplina</label>
+                                <select id="clase-id-tipo"></select>
+                            </div>
+                            <div class="clase-form-field">
+                                <label for="clase-fecha">Fecha</label>
+                                <input id="clase-fecha" type="date">
+                            </div>
+                            <div class="clase-form-field">
+                                <label for="clase-hora-inicio">Hora inicio</label>
+                                <input id="clase-hora-inicio" type="time">
+                            </div>
+                            <div class="clase-form-field">
+                                <label for="clase-hora-fin">Hora fin</label>
+                                <input id="clase-hora-fin" type="time">
+                            </div>
+                            <div class="clase-form-actions">
+                                <button id="clase-submit" type="button" class="boton">Guardar</button>
+                                <button id="clase-cancel" type="button" class="boton" style="display:none;">Cancelar</button>
+                            </div>
+                        </div>
+                        <p id="clase-form-msg" class="clase-form-msg"></p>
+                    </div>
+                    <p class="admin-subsection-title">Todas las clases</p>
+                    <div id="tabla-clases-wrap"></div>
+                </section>
 
-            <section class="admin-section" id="admin-reservas">
-                <h2>Reservas</h2>
-                <p class="admin-section-desc">Historial de reservas activas y canceladas.</p>
-                <div id="tabla-reservas-wrap"></div>
-            </section>
+                <section class="admin-section" id="admin-gestion-paquetes">
+                    <h2>Gestión de paquetes</h2>
+                    <p class="admin-section-desc">Crear, editar, deshabilitar y reactivar paquetes del catálogo.</p>
+                    <p class="admin-subsection-title">Nuevo paquete / Editar paquete</p>
+                    <div class="clase-form">
+                        <div class="clase-form-row">
+                            <div class="clase-form-field">
+                                <label for="paquete-nombre">Nombre</label>
+                                <input id="paquete-nombre" type="text" placeholder="Ej. 10 Clases" style="min-width:180px;">
+                            </div>
+                            <div class="clase-form-field">
+                                <label for="paquete-clases">Clases</label>
+                                <input id="paquete-clases" type="number" min="1" placeholder="10">
+                            </div>
+                            <div class="clase-form-field">
+                                <label for="paquete-precio">Precio ($)</label>
+                                <input id="paquete-precio" type="number" min="0" step="0.01" placeholder="999.00">
+                            </div>
+                            <div class="clase-form-field">
+                                <label for="paquete-vigencia">Vigencia (días)</label>
+                                <input id="paquete-vigencia" type="number" min="1" placeholder="30">
+                            </div>
+                            <div class="clase-form-actions">
+                                <button id="paquete-submit" type="button" class="boton">Guardar</button>
+                                <button id="paquete-cancel" type="button" class="boton" style="display:none;">Cancelar</button>
+                            </div>
+                        </div>
+                        <p id="paquete-form-msg" class="clase-form-msg"></p>
+                    </div>
+                    <p class="admin-subsection-title">Catálogo de paquetes</p>
+                    <div id="tabla-paquetes-catalogo-wrap"></div>
+                </section>
 
-            <section class="admin-section" id="admin-ocupacion">
-                <h2>Ocupación de clases</h2>
-                <p class="admin-section-desc">Cupo disponible y porcentaje de ocupación por clase.</p>
-                <div id="tabla-ocupacion-wrap"></div>
-            </section>
+                <section class="admin-section" id="admin-reportes">
+                    <h2>Reportes</h2>
+                    <p class="admin-section-desc">Filtra reservas y paquetes vendidos por rango de fechas y exporta a CSV.</p>
+                    <div class="admin-filtros-bar" style="margin-bottom:1.6rem;">
+                        <div class="clase-form-field">
+                            <label for="reporte-fecha-inicio" style="font-size:1.05rem;font-weight:700;color:#8c7168;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Fecha inicio</label>
+                            <input id="reporte-fecha-inicio" type="date">
+                        </div>
+                        <div class="clase-form-field">
+                            <label for="reporte-fecha-fin" style="font-size:1.05rem;font-weight:700;color:#8c7168;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Fecha fin</label>
+                            <input id="reporte-fecha-fin" type="date">
+                        </div>
+                        <select id="reporte-estado-reserva">
+                            <option value="todas">Reservas: Todas</option>
+                            <option value="activa">Activa</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                        <select id="reporte-disciplina"></select>
+                        <select id="reporte-paquete"></select>
+                        <button id="reporte-limpiar" type="button" class="boton">Limpiar</button>
+                    </div>
+                    <p class="admin-subsection-title">Resumen del período</p>
+                    <div class="admin-grid" id="reporte-resumen"></div>
+                    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin:1.6rem 0 0.8rem;">
+                        <button id="reporte-export-reservas" type="button" class="boton" style="font-size:1.25rem;padding:0.55rem 1.2rem;border-radius:8px;width:auto;margin-top:0;">⬇ Exportar reservas</button>
+                        <button id="reporte-export-paquetes" type="button" class="boton" style="font-size:1.25rem;padding:0.55rem 1.2rem;border-radius:8px;width:auto;margin-top:0;">⬇ Exportar paquetes</button>
+                        <button id="reporte-export-resumen" type="button" class="boton" style="font-size:1.25rem;padding:0.55rem 1.2rem;border-radius:8px;width:auto;margin-top:0;">⬇ Exportar resumen</button>
+                    </div>
+                    <p class="admin-subsection-title">Reservas filtradas</p>
+                    <div id="reporte-tabla-reservas"></div>
+                    <p class="admin-subsection-title">Paquetes vendidos filtrados</p>
+                    <div id="reporte-tabla-paquetes"></div>
+                </section>
 
-            <section class="admin-section" id="admin-contactos">
-                <h2>Mensajes de contacto</h2>
-                <p class="admin-section-desc">Mensajes enviados desde el formulario de contacto.</p>
-                <div id="tabla-contactos-wrap"></div>
-            </section>
+                <section class="admin-section" id="admin-usuarios">
+                    <h2>Gestión de usuarios</h2>
+                    <p class="admin-section-desc">Ver, cambiar rol, deshabilitar y reactivar cuentas de usuario.</p>
+                    <div id="tabla-usuarios-wrap"></div>
+                    <div id="admin-usuario-detalle-wrap"></div>
+                </section>
 
-        </div>
+                <section class="admin-section" id="admin-filtros">
+                    <p class="admin-subsection-title">Filtros de búsqueda</p>
+                    <div class="admin-filtros-bar">
+                        <input id="filtro-busqueda" type="text" placeholder="Buscar en todas las tablas...">
+                        <select id="filtro-contactos">
+                            <option value="todos">Contactos: Todos</option>
+                            <option value="nuevo">Nuevo</option>
+                            <option value="revisado">Revisado</option>
+                        </select>
+                        <select id="filtro-reservas">
+                            <option value="todas">Reservas: Todas</option>
+                            <option value="activa">Activa</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                        <button id="filtro-limpiar" type="button" class="boton">Limpiar filtros</button>
+                    </div>
+                </section>
+
+                <section class="admin-section" id="admin-paquetes">
+                    <h2>Paquetes adquiridos</h2>
+                    <p class="admin-section-desc">Paquetes adquiridos por los usuarios e ingresos estimados.</p>
+                    <div id="tabla-paquetes-wrap"></div>
+                </section>
+
+                <section class="admin-section" id="admin-reservas">
+                    <h2>Reservas</h2>
+                    <p class="admin-section-desc">Historial de reservas activas y canceladas.</p>
+                    <div id="tabla-reservas-wrap"></div>
+                </section>
+
+                <section class="admin-section" id="admin-ocupacion">
+                    <h2>Ocupación de clases</h2>
+                    <p class="admin-section-desc">Cupo disponible y porcentaje de ocupación por clase.</p>
+                    <div id="tabla-ocupacion-wrap"></div>
+                </section>
+
+                <section class="admin-section" id="admin-contactos">
+                    <h2>Mensajes de contacto</h2>
+                    <p class="admin-section-desc">Mensajes enviados desde el formulario de contacto.</p>
+                    <div id="tabla-contactos-wrap"></div>
+                </section>
+
+            </div><!-- /admin-sections-pool -->
+
+        </div><!-- /admin-contenido -->
 
     </main>
 

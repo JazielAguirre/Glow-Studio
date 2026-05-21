@@ -15,6 +15,8 @@
     var _filtros = { busqueda: '', contactoEstado: 'todos', reservaEstado: 'todas' };
     var _editingClaseId    = null;
     var _editingPaqueteId  = null;
+    var _currentAdminId    = null;
+    var _detalleUsuarioId  = null;
 
     function escapeHTML(value) {
         return String(value !== null && value !== undefined ? value : '')
@@ -76,15 +78,39 @@
 
     // ── Report tables (with filters) ──────────────────────────────────────────
 
-    function renderUsuarios(usuarios) {
+    function renderGestionUsuarios(usuarios) {
+        var isSelf = function (u) { return Number(u.id_usuario) === Number(_currentAdminId); };
         document.getElementById('tabla-usuarios-wrap').innerHTML = tabla(
-            ['ID', 'Nombre', 'Correo', 'Rol', 'Estado', 'Registro'],
+            ['ID', 'Nombre', 'Correo', 'Rol', 'Estado', 'Registro', 'Acciones'],
             usuarios,
             function (u) {
+                var id = Number(u.id_usuario);
+                var self = isSelf(u);
+                var isAdmin = u.tipo_usuario === 'admin';
+                var isActivo = u.estado === 'activo';
+
+                var btnDetalle = '<button class="admin-btn admin-btn-edit" onclick="window._verDetalleUsuario(' + id + ', this)">' +
+                    (Number(_detalleUsuarioId) === id ? 'Cerrar' : 'Ver detalle') + '</button>';
+
+                var btnRol = '';
+                if (!self) {
+                    btnRol = isAdmin
+                        ? '<button class="admin-btn admin-btn-disable" onclick="window._cambiarRolUsuario(' + id + ',\'usuario\',this)">Hacer usuario</button>'
+                        : '<button class="admin-btn admin-btn-reactivate" onclick="window._cambiarRolUsuario(' + id + ',\'admin\',this)">Hacer admin</button>';
+                }
+
+                var btnEstado = '';
+                if (!self) {
+                    btnEstado = isActivo
+                        ? '<button class="admin-btn admin-btn-disable" onclick="window._deshabilitarUsuario(' + id + ',this)">Deshabilitar</button>'
+                        : '<button class="admin-btn admin-btn-reactivate" onclick="window._reactivarUsuario(' + id + ',this)">Reactivar</button>';
+                }
+
                 return td(u.id_usuario) + td(u.nombre) + td(u.email) +
                     '<td>' + badge(u.tipo_usuario) + '</td>' +
                     '<td>' + badge(u.estado) + '</td>' +
-                    td(fmt(u.fecha_registro));
+                    td(fmt(u.fecha_registro)) +
+                    '<td>' + btnDetalle + btnRol + btnEstado + '</td>';
             }
         );
     }
@@ -148,7 +174,7 @@
     }
 
     function aplicarFiltros() {
-        renderUsuarios(_data.usuarios.filter(function (u) {
+        renderGestionUsuarios(_data.usuarios.filter(function (u) {
             return match(u.nombre) || match(u.email);
         }));
 
@@ -528,6 +554,472 @@
         }
     };
 
+    // ── Reports ───────────────────────────────────────────────────────────────
+
+    var _reportFiltros = { fechaInicio: '', fechaFin: '', estadoReserva: 'todas', disciplina: '', paqueteNombre: '' };
+
+    function parseDateOnly(dateStr) {
+        return dateStr ? String(dateStr).slice(0, 10) : '';
+    }
+
+    function inDateRange(dateStr, inicio, fin) {
+        var d = parseDateOnly(dateStr);
+        if (!d) return true;
+        if (inicio && d < inicio) return false;
+        if (fin   && d > fin)    return false;
+        return true;
+    }
+
+    function csvEscape(v) {
+        var s = v !== null && v !== undefined ? String(v) : '';
+        if (/[,"\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+
+    function toCSV(headers, rows) {
+        var lines = [headers.map(csvEscape).join(',')];
+        rows.forEach(function (row) { lines.push(row.map(csvEscape).join(',')); });
+        return lines.join('\r\n');
+    }
+
+    function downloadCSV(filename, csv) {
+        var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    function filteredReservas() {
+        var f = _reportFiltros;
+        return _data.reservas.filter(function (r) {
+            if (!inDateRange(r.fecha, f.fechaInicio, f.fechaFin)) return false;
+            if (f.estadoReserva !== 'todas' && r.estado !== f.estadoReserva) return false;
+            if (f.disciplina && r.disciplina !== f.disciplina) return false;
+            return true;
+        });
+    }
+
+    function filteredPaquetes() {
+        var f = _reportFiltros;
+        return _data.paquetes.filter(function (p) {
+            if (!inDateRange(p.fecha_inicio, f.fechaInicio, f.fechaFin)) return false;
+            if (f.paqueteNombre && p.paquete !== f.paqueteNombre) return false;
+            return true;
+        });
+    }
+
+    function renderReportSummary(paqList, resList) {
+        var el = document.getElementById('reporte-resumen');
+        if (!el) return;
+        var ingresos = paqList.reduce(function (acc, p) { return acc + Number(p.precio || 0); }, 0);
+        var activas   = resList.filter(function (r) { return r.estado === 'activa'; }).length;
+        var canceladas = resList.filter(function (r) { return r.estado === 'cancelada'; }).length;
+        var discCount = {}, pkgCount = {};
+        resList.forEach(function (r) { discCount[r.disciplina] = (discCount[r.disciplina] || 0) + 1; });
+        paqList.forEach(function (p) { pkgCount[p.paquete] = (pkgCount[p.paquete] || 0) + 1; });
+        var topDisc = Object.keys(discCount).sort(function (a, b) { return discCount[b] - discCount[a]; })[0] || '—';
+        var topPkg  = Object.keys(pkgCount).sort(function (a, b) { return pkgCount[b] - pkgCount[a]; })[0] || '—';
+        var items = [
+            { valor: '$' + ingresos.toLocaleString('es-MX', { minimumFractionDigits: 2 }), etiqueta: 'Ingresos estimados' },
+            { valor: paqList.length, etiqueta: 'Paquetes vendidos' },
+            { valor: resList.length, etiqueta: 'Reservas totales' },
+            { valor: activas,     etiqueta: 'Reservas activas' },
+            { valor: canceladas,  etiqueta: 'Reservas canceladas' },
+            { valor: topDisc, etiqueta: 'Disciplina más reservada' },
+            { valor: topPkg,  etiqueta: 'Paquete más vendido' },
+        ];
+        el.innerHTML = items.map(function (i) {
+            return '<div class="admin-card"><div class="valor">' + escapeHTML(String(i.valor)) +
+                   '</div><div class="etiqueta">' + escapeHTML(i.etiqueta) + '</div></div>';
+        }).join('');
+    }
+
+    function renderReportReservas(resList) {
+        var el = document.getElementById('reporte-tabla-reservas');
+        if (!el) return;
+        if (!resList.length) { el.innerHTML = '<p style="color:#9a7060;font-size:1.3rem;">Sin resultados para los filtros seleccionados.</p>'; return; }
+        el.innerHTML = tabla(
+            ['Usuario', 'Correo', 'Disciplina', 'Fecha', 'Hora', 'Estado'],
+            resList,
+            function (r) {
+                return td(r.usuario) + td(r.email) + td(r.disciplina) + td(fmt(r.fecha)) +
+                    td(r.hora_inicio ? r.hora_inicio.slice(0, 5) : '—') +
+                    '<td>' + badge(r.estado) + '</td>';
+            }
+        );
+    }
+
+    function renderReportPaquetes(paqList) {
+        var el = document.getElementById('reporte-tabla-paquetes');
+        if (!el) return;
+        if (!paqList.length) { el.innerHTML = '<p style="color:#9a7060;font-size:1.3rem;">Sin resultados para los filtros seleccionados.</p>'; return; }
+        el.innerHTML = tabla(
+            ['Usuario', 'Correo', 'Paquete', 'Precio', 'Clases rest.', 'Inicio', 'Vence', 'Estado'],
+            paqList,
+            function (p) {
+                return td(p.usuario) + td(p.email) + td(p.paquete) +
+                    td('$' + Number(p.precio).toFixed(2)) + td(p.clases_restantes) +
+                    td(fmt(p.fecha_inicio)) + td(fmt(p.fecha_expiracion)) +
+                    '<td>' + badge(p.estado) + '</td>';
+            }
+        );
+    }
+
+    function applyReportFilters() {
+        var paqList = filteredPaquetes();
+        var resList = filteredReservas();
+        renderReportSummary(paqList, resList);
+        renderReportReservas(resList);
+        renderReportPaquetes(paqList);
+    }
+
+    function initReportes() {
+        var discSel = document.getElementById('reporte-disciplina');
+        var pkgSel  = document.getElementById('reporte-paquete');
+        var fi      = document.getElementById('reporte-fecha-inicio');
+        var ff      = document.getElementById('reporte-fecha-fin');
+        var er      = document.getElementById('reporte-estado-reserva');
+        var lb      = document.getElementById('reporte-limpiar');
+        var btnResCSV = document.getElementById('reporte-export-reservas');
+        var btnPkgCSV = document.getElementById('reporte-export-paquetes');
+        var btnSumCSV = document.getElementById('reporte-export-resumen');
+
+        var discs = [];
+        _data.reservas.forEach(function (r) { if (r.disciplina && discs.indexOf(r.disciplina) === -1) discs.push(r.disciplina); });
+        discs.sort();
+        if (discSel) discSel.innerHTML = '<option value="">Disciplina: Todas</option>' +
+            discs.map(function (d) { return '<option value="' + escapeHTML(d) + '">' + escapeHTML(d) + '</option>'; }).join('');
+
+        var pkgNames = [];
+        _data.paquetesCatalogo.forEach(function (p) { if (p.nombre && pkgNames.indexOf(p.nombre) === -1) pkgNames.push(p.nombre); });
+        pkgNames.sort();
+        if (pkgSel) pkgSel.innerHTML = '<option value="">Paquete: Todos</option>' +
+            pkgNames.map(function (n) { return '<option value="' + escapeHTML(n) + '">' + escapeHTML(n) + '</option>'; }).join('');
+
+        function onChange() { applyReportFilters(); }
+        if (fi) fi.addEventListener('input', function () { _reportFiltros.fechaInicio = fi.value; onChange(); });
+        if (ff) ff.addEventListener('input', function () { _reportFiltros.fechaFin = ff.value; onChange(); });
+        if (er) er.addEventListener('change', function () { _reportFiltros.estadoReserva = er.value; onChange(); });
+        if (discSel) discSel.addEventListener('change', function () { _reportFiltros.disciplina = discSel.value; onChange(); });
+        if (pkgSel)  pkgSel.addEventListener('change',  function () { _reportFiltros.paqueteNombre = pkgSel.value; onChange(); });
+
+        if (lb) lb.addEventListener('click', function () {
+            _reportFiltros = { fechaInicio: '', fechaFin: '', estadoReserva: 'todas', disciplina: '', paqueteNombre: '' };
+            if (fi) fi.value = ''; if (ff) ff.value = '';
+            if (er) er.value = 'todas';
+            if (discSel) discSel.value = ''; if (pkgSel) pkgSel.value = '';
+            onChange();
+        });
+
+        if (btnResCSV) btnResCSV.addEventListener('click', function () {
+            var resList = filteredReservas();
+            if (!resList.length) { alert('Sin reservas para exportar con los filtros actuales.'); return; }
+            var today = new Date().toISOString().slice(0, 10);
+            downloadCSV('glow-reservas-' + today + '.csv', toCSV(
+                ['ID', 'Usuario', 'Correo', 'Disciplina', 'Fecha', 'Hora inicio', 'Hora fin', 'Estado', 'Fecha reserva'],
+                resList.map(function (r) {
+                    return [r.id_reserva, r.usuario, r.email, r.disciplina, parseDateOnly(r.fecha),
+                            r.hora_inicio || '', r.hora_fin || '', r.estado, parseDateOnly(r.fecha_reserva)];
+                })
+            ));
+        });
+
+        if (btnPkgCSV) btnPkgCSV.addEventListener('click', function () {
+            var paqList = filteredPaquetes();
+            if (!paqList.length) { alert('Sin paquetes para exportar con los filtros actuales.'); return; }
+            var today = new Date().toISOString().slice(0, 10);
+            downloadCSV('glow-paquetes-' + today + '.csv', toCSV(
+                ['ID', 'Usuario', 'Correo', 'Paquete', 'Precio', 'Clases rest.', 'Inicio', 'Vence', 'Estado'],
+                paqList.map(function (p) {
+                    return [p.id_usuario_paquete, p.usuario, p.email, p.paquete, p.precio,
+                            p.clases_restantes, parseDateOnly(p.fecha_inicio), parseDateOnly(p.fecha_expiracion), p.estado];
+                })
+            ));
+        });
+
+        if (btnSumCSV) btnSumCSV.addEventListener('click', function () {
+            var paqList = filteredPaquetes();
+            var resList = filteredReservas();
+            var ingresos = paqList.reduce(function (acc, p) { return acc + Number(p.precio || 0); }, 0);
+            var activas = resList.filter(function (r) { return r.estado === 'activa'; }).length;
+            var canceladas = resList.filter(function (r) { return r.estado === 'cancelada'; }).length;
+            var today = new Date().toISOString().slice(0, 10);
+            downloadCSV('glow-resumen-' + today + '.csv', toCSV(
+                ['Métrica', 'Valor'],
+                [
+                    ['Ingresos estimados', ingresos.toFixed(2)],
+                    ['Paquetes vendidos', paqList.length],
+                    ['Reservas totales', resList.length],
+                    ['Reservas activas', activas],
+                    ['Reservas canceladas', canceladas],
+                    ['Fecha inicio filtro', _reportFiltros.fechaInicio || 'Sin filtro'],
+                    ['Fecha fin filtro',    _reportFiltros.fechaFin    || 'Sin filtro'],
+                    ['Generado', today],
+                ]
+            ));
+        });
+
+        applyReportFilters();
+    }
+
+    // ── User management actions ───────────────────────────────────────────────
+
+    function renderUsuarioDetalle(detalle) {
+        var u = detalle.usuario;
+        var html = '<div class="admin-detalle-card">';
+        html += '<p class="admin-subsection-title">Detalle: ' + escapeHTML(u.nombre) + '</p>';
+        html += '<div class="admin-detalle-meta">';
+        html += '<span><strong>Email:</strong> ' + escapeHTML(u.email) + '</span>';
+        html += '<span><strong>Rol:</strong> ' + badge(u.tipo_usuario) + '</span>';
+        html += '<span><strong>Estado:</strong> ' + badge(u.estado) + '</span>';
+        html += '<span><strong>Registro:</strong> ' + escapeHTML(fmt(u.fecha_registro)) + '</span>';
+        html += '</div>';
+        html += '<div class="admin-detalle-resumen">';
+        html += '<span class="admin-detalle-stat"><strong>' + detalle.resumen.total_reservas + '</strong> reservas</span>';
+        html += '<span class="admin-detalle-stat"><strong>' + detalle.resumen.reservas_activas + '</strong> activas</span>';
+        html += '<span class="admin-detalle-stat"><strong>' + detalle.resumen.paquetes_activos + '</strong> paquetes activos</span>';
+        html += '</div>';
+
+        if (detalle.paquetes.length) {
+            html += '<p class="admin-subsection-title" style="margin-top:1.2rem;">Paquetes adquiridos</p>';
+            html += tabla(
+                ['Paquete', 'Clases rest.', 'Inicio', 'Vence', 'Estado'],
+                detalle.paquetes,
+                function (p) {
+                    return td(p.paquete) + td(p.clases_restantes) +
+                        td(fmt(p.fecha_inicio)) + td(fmt(p.fecha_expiracion)) +
+                        '<td>' + badge(p.estado) + '</td>';
+                }
+            );
+        } else {
+            html += '<p style="color:#9a7060;font-size:1.2rem;margin-top:1rem;">Sin paquetes adquiridos.</p>';
+        }
+
+        if (detalle.reservas.length) {
+            html += '<p class="admin-subsection-title" style="margin-top:1.2rem;">Reservas</p>';
+            html += tabla(
+                ['Disciplina', 'Fecha', 'Hora', 'Estado'],
+                detalle.reservas,
+                function (r) {
+                    return td(r.disciplina) + td(fmt(r.fecha)) +
+                        td(r.hora_inicio ? r.hora_inicio.slice(0, 5) : '—') +
+                        '<td>' + badge(r.estado) + '</td>';
+                }
+            );
+        } else {
+            html += '<p style="color:#9a7060;font-size:1.2rem;margin-top:1rem;">Sin reservas.</p>';
+        }
+
+        html += '</div>';
+        document.getElementById('admin-usuario-detalle-wrap').innerHTML = html;
+    }
+
+    window._verDetalleUsuario = async function (id, btn) {
+        var wrap = document.getElementById('admin-usuario-detalle-wrap');
+        if (Number(_detalleUsuarioId) === id) {
+            _detalleUsuarioId = null;
+            wrap.innerHTML = '';
+            renderGestionUsuarios(_data.usuarios);
+            return;
+        }
+        _detalleUsuarioId = id;
+        renderGestionUsuarios(_data.usuarios);
+        btn.textContent = '...';
+        btn.disabled = true;
+        try {
+            var data = await GlowAPI.getAdminUsuarioDetalle(id, token);
+            if (data.ok) {
+                renderUsuarioDetalle(data);
+            } else {
+                wrap.innerHTML = '<p style="color:#c0392b;font-size:1.3rem;">' + escapeHTML(data.error || 'Error al cargar detalle') + '</p>';
+            }
+        } catch (_) {
+            wrap.innerHTML = '<p style="color:#c0392b;font-size:1.3rem;">Error de conexión</p>';
+        }
+    };
+
+    window._cambiarRolUsuario = async function (id, nuevoRol, btn) {
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+            var data = await GlowAPI.actualizarAdminUsuarioRol(id, nuevoRol, token);
+            if (data.ok) {
+                var u = _data.usuarios.find(function (u) { return Number(u.id_usuario) === id; });
+                if (u) u.tipo_usuario = data.usuario.tipo_usuario;
+                renderGestionUsuarios(_data.usuarios);
+                if (Number(_detalleUsuarioId) === id) {
+                    GlowAPI.getAdminUsuarioDetalle(id, token).then(function (d) {
+                        if (d.ok) renderUsuarioDetalle(d);
+                    });
+                }
+            } else {
+                btn.disabled = false;
+                btn.textContent = nuevoRol === 'admin' ? 'Hacer admin' : 'Hacer usuario';
+                alert(data.error || 'Error al cambiar rol');
+            }
+        } catch (_) {
+            btn.disabled = false;
+            btn.textContent = nuevoRol === 'admin' ? 'Hacer admin' : 'Hacer usuario';
+            alert('Error de conexión');
+        }
+    };
+
+    window._deshabilitarUsuario = async function (id, btn) {
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+            var data = await GlowAPI.deshabilitarAdminUsuario(id, token);
+            if (data.ok) {
+                var u = _data.usuarios.find(function (u) { return Number(u.id_usuario) === id; });
+                if (u) u.estado = 'inactivo';
+                renderGestionUsuarios(_data.usuarios);
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Deshabilitar';
+                alert(data.error || 'Error al deshabilitar');
+            }
+        } catch (_) {
+            btn.disabled = false;
+            btn.textContent = 'Deshabilitar';
+            alert('Error de conexión');
+        }
+    };
+
+    window._reactivarUsuario = async function (id, btn) {
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+            var data = await GlowAPI.reactivarAdminUsuario(id, token);
+            if (data.ok) {
+                var u = _data.usuarios.find(function (u) { return Number(u.id_usuario) === id; });
+                if (u) u.estado = 'activo';
+                renderGestionUsuarios(_data.usuarios);
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Reactivar';
+                alert(data.error || 'Error al reactivar');
+            }
+        } catch (_) {
+            btn.disabled = false;
+            btn.textContent = 'Reactivar';
+            alert('Error de conexión');
+        }
+    };
+
+    // ── Admin module overlay system ───────────────────────────────────────────
+
+    var ADMIN_MODULES = {
+        usuarios:  { title: 'Gestión de usuarios',    desc: 'Roles, acceso y estado de cuentas',                 sectionIds: ['admin-usuarios'],                                        hash: 'admin-usuarios' },
+        clases:    { title: 'Gestión de clases',       desc: 'Crear, editar y administrar clases programadas',    sectionIds: ['admin-gestion-clases'],                                  hash: 'admin-gestion-clases' },
+        paquetes:  { title: 'Gestión de paquetes',     desc: 'Catálogo de paquetes y disponibilidad',             sectionIds: ['admin-gestion-paquetes'],                                hash: 'admin-gestion-paquetes' },
+        reportes:  { title: 'Reportes',                desc: 'Filtros, métricas del período y exportación CSV',   sectionIds: ['admin-reportes'],                                        hash: 'admin-reportes' },
+        historial: { title: 'Reservas e historial',    desc: 'Paquetes adquiridos, reservas y ocupación',         sectionIds: ['admin-filtros', 'admin-paquetes', 'admin-reservas', 'admin-ocupacion'], hash: 'admin-reservas' },
+        contactos: { title: 'Contactos',               desc: 'Mensajes del formulario de contacto',               sectionIds: ['admin-contactos'],                                       hash: 'admin-contactos' },
+    };
+
+    var HASH_TO_MODULE = {
+        'admin-usuarios':         'usuarios',
+        'admin-gestion-clases':   'clases',
+        'admin-gestion-paquetes': 'paquetes',
+        'admin-reportes':         'reportes',
+        'admin-reservas':         'historial',
+        'admin-paquetes':         'historial',
+        'admin-ocupacion':        'historial',
+        'admin-contactos':        'contactos',
+    };
+
+    var _activeModule = null;
+
+    function openAdminModule(key) {
+        var config = ADMIN_MODULES[key];
+        if (!config) return;
+        _activeModule = key;
+
+        var pool    = document.getElementById('admin-sections-pool');
+        var body    = document.getElementById('admin-module-body');
+        var overlay = document.getElementById('admin-module-overlay');
+
+        // Return any sections currently in the overlay body back to pool
+        while (body.firstChild) {
+            pool.appendChild(body.firstChild);
+        }
+
+        // Move target sections into overlay body
+        config.sectionIds.forEach(function (id) {
+            var section = document.getElementById(id);
+            if (section) body.appendChild(section);
+        });
+
+        // Set header text
+        document.getElementById('admin-module-title').textContent    = config.title;
+        document.getElementById('admin-module-subtitle').textContent = config.desc;
+
+        // Show overlay, scroll to top
+        overlay.classList.add('is-open');
+        overlay.scrollTop = 0;
+        body.scrollTop    = 0;
+
+        // Active card state
+        document.querySelectorAll('.admin-module-card').forEach(function (c) {
+            c.classList.toggle('is-active', c.dataset.module === key);
+        });
+
+        // Update URL hash without scroll-jump
+        history.pushState(null, null, '#' + config.hash);
+    }
+
+    function closeAdminModule() {
+        var pool    = document.getElementById('admin-sections-pool');
+        var body    = document.getElementById('admin-module-body');
+        var overlay = document.getElementById('admin-module-overlay');
+
+        // Return sections to pool
+        while (body.firstChild) {
+            pool.appendChild(body.firstChild);
+        }
+
+        overlay.classList.remove('is-open');
+        _activeModule = null;
+
+        document.querySelectorAll('.admin-module-card').forEach(function (c) {
+            c.classList.remove('is-active');
+        });
+
+        // Clear hash
+        history.pushState(null, null, window.location.pathname + window.location.search);
+    }
+
+    function bindAdminModuleCards() {
+        document.querySelectorAll('.admin-module-card').forEach(function (card) {
+            var key = card.dataset.module;
+            card.querySelector('.admin-module-open').addEventListener('click', function () {
+                openAdminModule(key);
+            });
+        });
+
+        var closeBtn = document.getElementById('admin-module-close');
+        if (closeBtn) closeBtn.addEventListener('click', closeAdminModule);
+
+        // Backdrop click closes overlay
+        var overlay = document.getElementById('admin-module-overlay');
+        if (overlay) overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeAdminModule();
+        });
+
+        // Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && _activeModule) closeAdminModule();
+        });
+    }
+
+    function handleAdminHash() {
+        var hash = window.location.hash.slice(1);
+        var moduleKey = HASH_TO_MODULE[hash];
+        if (moduleKey) openAdminModule(moduleKey);
+    }
+
     // ── Bootstrap ─────────────────────────────────────────────────────────────
 
     GlowAPI.me(token).then(function (data) {
@@ -536,10 +1028,12 @@
             return;
         }
 
+        _currentAdminId = data.user.id_usuario;
         document.getElementById('admin-contenido').style.display = 'block';
         initFiltros();
         initClaseForm();
         initPaqueteForm();
+        bindAdminModuleCards();
 
         Promise.all([
             GlowAPI.getAdminDashboard(token),
@@ -571,6 +1065,8 @@
                 renderGestionPaquetes(_data.paquetesCatalogo);
             }
             aplicarFiltros();
+            initReportes();
+            handleAdminHash();
         }).catch(function (err) {
             console.error('[admin] Error cargando datos:', err);
         });

@@ -54,7 +54,7 @@ async function login(req, res, next) {
         }
 
         if (user.estado !== 'activo') {
-            return res.status(403).json({ ok: false, error: 'Cuenta inactiva' });
+            return res.status(401).json({ ok: false, error: 'Credenciales inválidas' });
         }
 
         const token = authService.generateToken(user);

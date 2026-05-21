@@ -119,6 +119,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 | Forgot password | http://127.0.0.1:8765/html/forgot-password.html |
 | Reset password | http://127.0.0.1:8765/html/reset-password.html?token=... |
 | My Reservations | http://127.0.0.1:8765/html/mis-reservas.html |
+| My Purchases | http://127.0.0.1:8765/html/mis-paquetes.html |
 | Admin Panel | http://127.0.0.1:8765/html/admin.html *(admin role required)* |
 
 ---
@@ -128,10 +129,11 @@ python3 -m http.server 8765 --bind 127.0.0.1
 ### User flow
 1. **Register** at `/html/registro.html`
 2. **Log in** at `/html/login.html`
-3. **Acquire a package** at `/html/paquetes.html` — click "Adquirir paquete"
-4. **Reserve a class** at `/html/clases.html` — click "Reservar"
-5. **View and cancel reservations** at `/html/mis-reservas.html`
-6. **Send a contact message** at `/html/contacto.html`
+3. **Acquire a package** at `/html/paquetes.html` — click "Adquirir paquete", confirm in the demo checkout dialog, and receive a folio/receipt
+4. **View purchase history** at `/html/mis-paquetes.html` — full purchase history with folios, remaining classes, and expiration dates
+5. **Reserve a class** at `/html/clases.html` — click "Reservar"
+6. **View and cancel reservations** at `/html/mis-reservas.html`
+7. **Send a contact message** at `/html/contacto.html`
 
 > **First-time testing without purchasing:** apply the optional dev seed after registering:
 > ```bash
@@ -155,9 +157,11 @@ python3 -m http.server 8765 --bind 127.0.0.1
 5. Review **metrics**: total users, active packages, estimated revenue, reservations, contact messages
 6. **Gestión de clases**: create, edit, disable, and reactivate scheduled classes
 7. **Gestión de paquetes**: create, edit, disable, and reactivate package catalogue entries
-8. Browse **report tables**: users, acquired packages, reservations, class occupancy, contacts
-9. **Filter tables** using the search bar and status dropdowns
-10. **Mark contacts as reviewed** with the inline button (updates status without reload)
+8. **Gestión de usuarios**: view all users, promote/demote roles, disable/reactivate accounts, view per-user detail (packages and reservations)
+9. **Reportes**: filter reservations and package sales by date range, discipline, package, and status — then export CSV files (reservas, paquetes, resumen)
+10. Browse **report tables**: users, acquired packages, reservations, class occupancy, contacts
+11. **Filter tables** using the search bar and status dropdowns
+12. **Mark contacts as reviewed** with the inline button (updates status without reload)
 
 ---
 
@@ -179,8 +183,9 @@ python3 -m http.server 8765 --bind 127.0.0.1
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/auth/me` | Current user info + role |
-| POST | `/api/paquetes/:id/comprar` | Acquire a package |
-| GET | `/api/usuario-paquetes` | User's active packages |
+| POST | `/api/paquetes/:id/comprar` | Acquire a package (returns receipt data for folio) |
+| GET | `/api/paquetes/mis-paquetes` | Full purchase history (active + expired) |
+| GET | `/api/usuario-paquetes` | User's active packages (for reservation checks) |
 | GET | `/api/reservas` | User's reservations |
 | POST | `/api/reservas` | Create reservation |
 | PATCH | `/api/reservas/:id/cancelar` | Cancel reservation |
@@ -190,6 +195,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
 |---|---|---|
 | GET | `/api/admin/dashboard` | Aggregated studio metrics |
 | GET | `/api/admin/usuarios` | All registered users |
+| GET | `/api/admin/usuarios/:id/detalle` | User detail with packages and reservations |
+| PATCH | `/api/admin/usuarios/:id/rol` | Change user role (usuario ↔ admin) |
+| PATCH | `/api/admin/usuarios/:id/deshabilitar` | Disable a user account |
+| PATCH | `/api/admin/usuarios/:id/reactivar` | Reactivate a user account |
 | GET | `/api/admin/paquetes` | All acquired packages (purchase history) |
 | GET | `/api/admin/reservas` | All reservations |
 | GET | `/api/admin/clases-ocupacion` | Class occupancy rates |
@@ -211,9 +220,12 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 ## Known limitations
 
-- No real payment flow — package acquisition is demo-only.
+- No real payment flow — package acquisition uses a demo checkout dialog with no actual charge.
+- Package receipt folio (`GS-YYYYMMDD-<id>`) is generated client-side — no dedicated payments table.
 - A cancelled reservation cannot be re-booked for the same class (schema constraint).
 - Password reset sends no real email — the reset link is returned directly in the API response (demo/local only).
-- No pagination in admin report tables.
-- User role promotion (`usuario` → `admin`) requires a direct database UPDATE; there is no UI for it.
+- No pagination in admin report tables or report CSV exports.
+- Admin report CSV export is client-side (Blob) — no server-side generation.
+- User role promotion (`usuario` → `admin`) via UI is now available in the admin Gestión de usuarios panel; direct DB UPDATE also works.
+- Inactive users are blocked at login with a generic 401 (no account status leak).
 - Contact form messages are stored in the database but no email is sent.

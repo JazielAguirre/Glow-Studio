@@ -248,6 +248,79 @@ async function reactivarPaquete(id) {
     return result.rows[0] || null;
 }
 
+// ── User management ───────────────────────────────────────────────────────────
+
+async function getUsuarioDetalle(id) {
+    const userRes = await pool.query(
+        `SELECT id_usuario, nombre, email, tipo_usuario, estado, fecha_registro
+         FROM usuarios WHERE id_usuario = $1`,
+        [id]
+    );
+    if (!userRes.rows.length) return null;
+    const usuario = userRes.rows[0];
+
+    const paquetesRes = await pool.query(
+        `SELECT p.nombre AS paquete, up.clases_restantes,
+                up.fecha_inicio, up.fecha_expiracion, up.estado
+         FROM usuario_paquetes up
+         JOIN paquetes p USING(id_paquete)
+         WHERE up.id_usuario = $1
+         ORDER BY up.fecha_inicio DESC`,
+        [id]
+    );
+
+    const reservasRes = await pool.query(
+        `SELECT tc.nombre AS disciplina, c.fecha, c.hora_inicio, r.estado
+         FROM reservas r
+         JOIN clases c USING(id_clase)
+         JOIN tipos_clase tc USING(id_tipo)
+         WHERE r.id_usuario = $1
+         ORDER BY c.fecha DESC, c.hora_inicio`,
+        [id]
+    );
+
+    const total_reservas   = reservasRes.rows.length;
+    const reservas_activas = reservasRes.rows.filter(function (r) { return r.estado === 'activa'; }).length;
+    const paquetes_activos = paquetesRes.rows.filter(function (p) { return p.estado === 'activo'; }).length;
+
+    return {
+        usuario,
+        paquetes: paquetesRes.rows,
+        reservas: reservasRes.rows,
+        resumen: { total_reservas, reservas_activas, paquetes_activos },
+    };
+}
+
+async function cambiarRolUsuario(id, tipo_usuario) {
+    const result = await pool.query(
+        `UPDATE usuarios SET tipo_usuario = $1
+         WHERE id_usuario = $2
+         RETURNING id_usuario, nombre, email, tipo_usuario, estado, fecha_registro`,
+        [tipo_usuario, id]
+    );
+    return result.rows[0] || null;
+}
+
+async function deshabilitarUsuario(id) {
+    const result = await pool.query(
+        `UPDATE usuarios SET estado = 'inactivo'
+         WHERE id_usuario = $1
+         RETURNING id_usuario, nombre, email, tipo_usuario, estado, fecha_registro`,
+        [id]
+    );
+    return result.rows[0] || null;
+}
+
+async function reactivarUsuario(id) {
+    const result = await pool.query(
+        `UPDATE usuarios SET estado = 'activo'
+         WHERE id_usuario = $1
+         RETURNING id_usuario, nombre, email, tipo_usuario, estado, fecha_registro`,
+        [id]
+    );
+    return result.rows[0] || null;
+}
+
 module.exports = {
     getDashboard,
     getUsuarios,
@@ -267,4 +340,8 @@ module.exports = {
     actualizarPaquete,
     deshabilitarPaquete,
     reactivarPaquete,
+    getUsuarioDetalle,
+    cambiarRolUsuario,
+    deshabilitarUsuario,
+    reactivarUsuario,
 };
