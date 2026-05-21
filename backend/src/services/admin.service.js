@@ -183,6 +183,71 @@ async function reactivarClase(id) {
     return result.rows[0] || null;
 }
 
+async function getPaquetesCatalogo() {
+    const result = await pool.query(`
+        SELECT p.id_paquete,
+               p.nombre,
+               p.cantidad_clases,
+               p.precio,
+               p.vigencia_dias,
+               p.estado,
+               COUNT(up.id_usuario_paquete)::int              AS veces_vendido,
+               COALESCE(COUNT(up.id_usuario_paquete) * p.precio, 0) AS ingresos_estimados
+        FROM paquetes p
+        LEFT JOIN usuario_paquetes up USING(id_paquete)
+        GROUP BY p.id_paquete
+        ORDER BY p.precio ASC
+    `);
+    return result.rows;
+}
+
+async function crearPaquete({ nombre, cantidad_clases, precio, vigencia_dias }) {
+    const result = await pool.query(
+        `INSERT INTO paquetes (nombre, cantidad_clases, precio, vigencia_dias)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id_paquete, nombre, cantidad_clases, precio, vigencia_dias, estado`,
+        [nombre, cantidad_clases, precio, vigencia_dias]
+    );
+    return result.rows[0];
+}
+
+async function actualizarPaquete(id, { nombre, cantidad_clases, precio, vigencia_dias }) {
+    const result = await pool.query(
+        `UPDATE paquetes SET nombre = $1, cantidad_clases = $2, precio = $3, vigencia_dias = $4
+         WHERE id_paquete = $5
+         RETURNING id_paquete, nombre, cantidad_clases, precio, vigencia_dias, estado`,
+        [nombre, cantidad_clases, precio, vigencia_dias, id]
+    );
+    return result.rows[0] || null;
+}
+
+async function deshabilitarPaquete(id) {
+    const countRes = await pool.query(
+        `SELECT COUNT(*)::int AS veces_vendido FROM usuario_paquetes WHERE id_paquete = $1`,
+        [id]
+    );
+    const veces_vendido = countRes.rows[0].veces_vendido;
+
+    const result = await pool.query(
+        `UPDATE paquetes SET estado = 'inactivo'
+         WHERE id_paquete = $1
+         RETURNING id_paquete, nombre, estado`,
+        [id]
+    );
+    if (!result.rows[0]) return null;
+    return { ...result.rows[0], veces_vendido };
+}
+
+async function reactivarPaquete(id) {
+    const result = await pool.query(
+        `UPDATE paquetes SET estado = 'activo'
+         WHERE id_paquete = $1
+         RETURNING id_paquete, nombre, estado`,
+        [id]
+    );
+    return result.rows[0] || null;
+}
+
 module.exports = {
     getDashboard,
     getUsuarios,
@@ -197,4 +262,9 @@ module.exports = {
     actualizarClase,
     deshabilitarClase,
     reactivarClase,
+    getPaquetesCatalogo,
+    crearPaquete,
+    actualizarPaquete,
+    deshabilitarPaquete,
+    reactivarPaquete,
 };

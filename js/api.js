@@ -185,6 +185,63 @@
         return response.json();
     }
 
+    async function solicitarRecuperacionPassword(email) {
+        const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        });
+        return response.json();
+    }
+
+    async function restablecerPassword(token, nueva_contrasena) {
+        const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, nueva_contrasena }),
+        });
+        return response.json();
+    }
+
+    async function getAdminPaquetesCatalogo(token) {
+        const response = await fetch(`${API_BASE_URL}/admin/paquetes-catalogo`, { headers: authHeader(token) });
+        return response.json();
+    }
+
+    async function crearAdminPaquete(datos, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/paquetes-catalogo`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...authHeader(token) },
+            body: JSON.stringify(datos),
+        });
+        return response.json();
+    }
+
+    async function actualizarAdminPaquete(id, datos, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/paquetes-catalogo/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", ...authHeader(token) },
+            body: JSON.stringify(datos),
+        });
+        return response.json();
+    }
+
+    async function deshabilitarAdminPaquete(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/paquetes-catalogo/${id}/deshabilitar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
+    async function reactivarAdminPaquete(id, token) {
+        const response = await fetch(`${API_BASE_URL}/admin/paquetes-catalogo/${id}/reactivar`, {
+            method: "PATCH",
+            headers: authHeader(token),
+        });
+        return response.json();
+    }
+
     window.GlowAPI = {
         API_BASE_URL,
         getHealth,
@@ -212,5 +269,12 @@
         actualizarAdminClase,
         deshabilitarAdminClase,
         reactivarAdminClase,
+        solicitarRecuperacionPassword,
+        restablecerPassword,
+        getAdminPaquetesCatalogo,
+        crearAdminPaquete,
+        actualizarAdminPaquete,
+        deshabilitarAdminPaquete,
+        reactivarAdminPaquete,
     };
 })();

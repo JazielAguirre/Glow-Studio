@@ -99,6 +99,8 @@ jobs:
           psql -h localhost -U postgres -d glow_studio -f database/migrations/004_clases_seed.sql
           psql -h localhost -U postgres -d glow_studio -f database/migrations/006_contactos.sql
           psql -h localhost -U postgres -d glow_studio -f database/migrations/007_roles.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/008_clases_demo_future_seed.sql
+          psql -h localhost -U postgres -d glow_studio -f database/migrations/010_password_reset_tokens.sql
           echo "OK: all migrations applied"
 
       # ── Backend startup ───────────────────────────────────────────────────
@@ -196,6 +198,29 @@ jobs:
           echo "Status: $STATUS"
           [ "$STATUS" = "401" ] || (echo "FAIL: expected 401, got $STATUS"; exit 1)
           echo "OK: /api/admin/dashboard returns 401 without token"
+
+      - name: Endpoint — POST /api/auth/forgot-password (public, unknown email returns 200 without token leak)
+        run: |
+          RESPONSE=$(curl -sf -X POST http://localhost:3010/api/auth/forgot-password \
+            -H "Content-Type: application/json" \
+            -d '{"email":"nobody@ci-test.invalid"}')
+          echo "$RESPONSE"
+          echo "$RESPONSE" | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          assert d['ok'], 'ok is not true'
+          assert 'demo_reset_token' not in d, 'demo_reset_token must not be present for unknown email'
+          print('OK: /api/auth/forgot-password returns 200 and does not leak token for unknown email')
+          "
+
+      - name: Endpoint — POST /api/auth/reset-password (invalid token must return 400)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3010/api/auth/reset-password \
+            -H "Content-Type: application/json" \
+            -d '{"token":"ci_invalid_token_00000000000000000000000000000000000000000000000000","nueva_contrasena":"ValidPass123"}')
+          echo "Status: $STATUS"
+          [ "$STATUS" = "400" ] || (echo "FAIL: expected 400, got $STATUS"; exit 1)
+          echo "OK: /api/auth/reset-password returns 400 for invalid token"
 
       # ── Always show backend log for debugging ─────────────────────────────
 
