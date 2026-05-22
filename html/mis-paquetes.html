@@ -22,39 +22,107 @@
     <link rel="stylesheet" href="../css/style.css">
 
     <style>
-        .compras-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.2rem 3rem; }
-        .compras-titulo { font-size: 2.4rem; font-weight: 700; color: #3d2b1f; margin-bottom: 2rem; text-align: center; }
+        :root {
+            --gs-cream: #faf8f5; --gs-white: #fff; --gs-border: #ede8e2;
+            --gs-accent: #c9956a; --gs-accent-lt: #f5ede5;
+            --gs-brown: #2d1f17; --gs-brown-md: #3d2b1f; --gs-muted: #8c7168;
+            --gs-sage: #4a7c5f; --gs-sage-lt: #d4edda;
+        }
+
+        body { background: var(--gs-cream); }
+
+        .mp-wrap { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.4rem 4rem; }
+
+        /* ── Page hero ───────────────────────────────────────────────────────── */
+        .mp-hero { text-align: center; margin-bottom: 2.4rem; }
+        .mp-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5vw, 3.6rem);
+            color: var(--gs-brown); font-weight: 700; margin: 0 0 0.4rem;
+        }
+        .mp-subtitle { color: var(--gs-muted); font-size: 1.5rem; margin: 0; }
+
+        /* ── Summary stat cards ──────────────────────────────────────────────── */
+        .mp-stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .mp-stat {
+            background: var(--gs-white); border: 1.5px solid var(--gs-border);
+            border-radius: 14px; padding: 1.4rem 1.2rem; text-align: center;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .mp-stat:hover { box-shadow: 0 6px 20px rgba(45,31,23,0.08); transform: translateY(-2px); }
+        .mp-stat-val { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 700; color: var(--gs-accent); }
+        .mp-stat-label { font-size: 1.1rem; color: var(--gs-muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.07em; }
+
+        /* ── Filter tabs ─────────────────────────────────────────────────────── */
+        .mp-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.8rem; flex-wrap: wrap; }
+        .mp-tab {
+            padding: 0.5rem 1.4rem; border-radius: 30px; font-size: 1.3rem;
+            font-weight: 600; cursor: pointer; border: 1.5px solid var(--gs-border);
+            background: transparent; color: var(--gs-muted);
+            transition: background 0.18s, border-color 0.18s, color 0.18s;
+        }
+        .mp-tab.active, .mp-tab:hover { background: var(--gs-accent); border-color: var(--gs-accent); color: #fff; }
+
+        /* ── Purchase cards ──────────────────────────────────────────────────── */
         .compra-card {
-            background: #fff;
-            border: 1.5px solid #e8ddd5;
-            border-radius: 14px;
-            padding: 1.4rem 1.6rem;
-            margin-bottom: 1.2rem;
-            transition: box-shadow 0.2s;
+            background: var(--gs-white); border: 1.5px solid var(--gs-border);
+            border-radius: 16px; padding: 1.5rem 1.7rem;
+            margin-bottom: 1.2rem; transition: box-shadow 0.22s, border-color 0.22s;
+            animation: mpFadeUp 0.4s ease both;
         }
-        .compra-card:hover { box-shadow: 0 4px 18px rgba(89,56,45,0.09); }
-        .compra-card.estado-inactivo { opacity: 0.7; border-color: #e0e0e0; }
-        .compra-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .compra-folio { font-size: 1.2rem; color: #9a7060; font-family: monospace; }
-        .compra-estado {
-            font-size: 1.1rem; font-weight: 700; padding: 0.2rem 0.8rem;
+        .compra-card:nth-child(1){animation-delay:.04s} .compra-card:nth-child(2){animation-delay:.1s}
+        .compra-card:nth-child(3){animation-delay:.16s} .compra-card:nth-child(4){animation-delay:.22s}
+        .compra-card:nth-child(5){animation-delay:.28s}
+        @keyframes mpFadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .compra-card:hover { box-shadow: 0 6px 22px rgba(45,31,23,0.08); border-color: #ddd0c4; }
+        .compra-card.estado-inactivo { opacity: 0.65; border-color: #e0dbd5; }
+
+        .compra-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem; }
+        .compra-folio { font-size: 1.2rem; color: var(--gs-muted); font-family: monospace; }
+        .compra-badge {
+            font-size: 1.1rem; font-weight: 700; padding: 0.25rem 0.85rem;
             border-radius: 20px; letter-spacing: 0.04em;
         }
-        .estado-activo .compra-estado { background: #d4edda; color: #155724; }
-        .estado-inactivo .compra-estado { background: #fde8cc; color: #7a4a10; }
-        .compra-nombre { font-size: 1.8rem; font-weight: 700; color: #c9956a; margin: 0.3rem 0 0.9rem; }
-        .compra-detalle {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.6rem 1rem;
+        .badge-activo  { background: var(--gs-sage-lt); color: #155724; }
+        .badge-inactivo { background: #fde8cc; color: #7a4a10; }
+        .badge-vencido { background: #f8d7da; color: #721c24; }
+
+        .compra-nombre { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gs-accent); margin: 0 0 1rem; line-height: 1.2; }
+        .compra-detalle { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; }
+        .compra-detalle-item span { display: block; color: var(--gs-muted); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.15rem; }
+        .compra-detalle-item strong { font-size: 1.4rem; color: var(--gs-brown-md); font-weight: 700; }
+
+        .compra-footer { display: flex; align-items: center; justify-content: flex-end; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--gs-border); }
+        .compra-cta {
+            display: inline-block; padding: 0.5rem 1.4rem; border-radius: 30px;
+            font-size: 1.3rem; font-weight: 600; text-decoration: none;
+            background: var(--gs-accent); color: #fff;
+            transition: background 0.18s;
         }
-        .compra-detalle > div { font-size: 1.3rem; }
-        .compra-detalle span { display: block; color: #9a7060; font-size: 1.1rem; text-transform: uppercase;
-            letter-spacing: 0.06em; }
-        .compra-detalle strong { color: #3d2b1f; }
-        .compras-vacio { text-align: center; color: #9a7060; font-size: 1.5rem; padding: 3rem 0; }
+        .compra-cta:hover { background: #b5854f; }
+
+        /* ── Empty state ─────────────────────────────────────────────────────── */
+        .mp-empty {
+            text-align: center; padding: 4rem 1rem;
+            background: var(--gs-white); border: 1.5px solid var(--gs-border);
+            border-radius: 18px; margin-top: 1rem;
+        }
+        .mp-empty-icon { font-size: 3.6rem; margin-bottom: 1rem; }
+        .mp-empty-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gs-brown); margin: 0 0 0.5rem; }
+        .mp-empty-sub { color: var(--gs-muted); font-size: 1.4rem; margin: 0 0 1.6rem; }
+        .mp-empty-cta {
+            display: inline-block; padding: 0.65rem 1.8rem; border-radius: 30px;
+            font-size: 1.4rem; font-weight: 600; text-decoration: none;
+            background: var(--gs-accent); color: #fff;
+            transition: background 0.18s;
+        }
+        .mp-empty-cta:hover { background: #b5854f; }
+
+        /* ── Loading ─────────────────────────────────────────────────────────── */
+        .mp-loading { text-align: center; color: var(--gs-muted); font-size: 1.5rem; padding: 3rem 0; }
     </style>
 </head>
 <body>
@@ -64,9 +132,7 @@
 
     <div class="nav-bg">
         <nav class="navegacion-principal">
-            <div class="contenedor-logo">
-                <a href="index.html">Glow Studio</a>
-            </div>
+            <div class="contenedor-logo"><a href="index.html">Glow Studio</a></div>
             <div class="menu">
                 <a href="clases.html">Clases</a>
                 <a href="paquetes.html">Paquetes</a>
@@ -91,17 +157,29 @@
     </div>
 
     <main>
-        <div class="compras-wrap">
-            <h2 class="compras-titulo">Mis compras</h2>
-            <div id="mis-paquetes-container"><p class="compras-vacio">Cargando...</p></div>
+        <div class="mp-wrap">
+            <div class="mp-hero">
+                <h2 class="mp-title">Mis compras</h2>
+                <p class="mp-subtitle">Historial de paquetes adquiridos</p>
+            </div>
+
+            <div class="mp-stats" id="mp-stats"></div>
+
+            <div class="mp-tabs" id="mp-tabs">
+                <button class="mp-tab active" data-filter="todos">Todos</button>
+                <button class="mp-tab" data-filter="activo">Activos</button>
+                <button class="mp-tab" data-filter="inactivo">Vencidos</button>
+            </div>
+
+            <div id="mis-paquetes-container"><p class="mp-loading">Cargando...</p></div>
         </div>
     </main>
 
     <footer class="footer">
         <nav>
-            <a href="#">Contacto</a>
+            <a href="contacto.html">Contacto</a>
             <a href="paquetes.html">Paquetes</a>
-            <a href="#">Términos y condiciones de privacidad</a>
+            <a href="#">Términos y condiciones</a>
         </nav>
     </footer>
 

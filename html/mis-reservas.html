@@ -22,6 +22,102 @@
 
     <link rel="preload" href="../css/style.css" as="style">
     <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        :root {
+            --gs-cream: #faf8f5; --gs-white: #fff; --gs-border: #ede8e2;
+            --gs-accent: #c9956a; --gs-accent-lt: #f5ede5;
+            --gs-brown: #2d1f17; --gs-brown-md: #3d2b1f; --gs-muted: #8c7168;
+            --gs-sage: #4a7c5f; --gs-sage-lt: #d4edda;
+            --gs-danger: #e07070; --gs-danger-lt: #fde8e8;
+        }
+
+        body { background: var(--gs-cream); }
+
+        /* ── Page layout ─────────────────────────────────────────────────────── */
+        .schedule-section { padding: 2.5rem 1.4rem 4rem; max-width: 960px; margin: auto; }
+        .schedule-section > h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5vw, 3.6rem);
+            color: var(--gs-brown); text-align: center;
+            margin: 0 0 0.5rem; font-weight: 700;
+        }
+        .mr-subheading { text-align: center; color: var(--gs-muted); font-size: 1.5rem; margin: 0 0 2rem; }
+
+        /* ── Stat cards ──────────────────────────────────────────────────────── */
+        .mr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.8rem; }
+        .mr-stat { background: var(--gs-white); border: 1.5px solid var(--gs-border); border-radius: 14px; padding: 1.3rem 1rem; text-align: center; transition: box-shadow 0.2s; }
+        .mr-stat:hover { box-shadow: 0 5px 18px rgba(45,31,23,0.07); }
+        .mr-stat-val { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--gs-accent); }
+        .mr-stat-label { font-size: 1.1rem; color: var(--gs-muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.07em; }
+
+        /* ── Filter tabs ─────────────────────────────────────────────────────── */
+        .mr-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.6rem; flex-wrap: wrap; }
+        .mr-tab {
+            padding: 0.5rem 1.4rem; border-radius: 30px; font-size: 1.3rem;
+            font-weight: 600; cursor: pointer; border: 1.5px solid var(--gs-border);
+            background: transparent; color: var(--gs-muted);
+            transition: background 0.18s, border-color 0.18s, color 0.18s;
+        }
+        .mr-tab.active, .mr-tab:hover { background: var(--gs-accent); border-color: var(--gs-accent); color: #fff; }
+
+        /* ── Active packages summary ─────────────────────────────────────────── */
+        #mis-paquetes { margin-bottom: 1.6rem; }
+        .paquetes-balance-bar {
+            background: var(--gs-accent-lt); border: 1.5px solid #e8d5c4;
+            border-radius: 14px; padding: 1.1rem 1.6rem;
+            display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+            align-items: center; justify-content: space-between;
+        }
+        .paquetes-balance-label { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--gs-brown); flex-shrink: 0; }
+        .paquetes-balance-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; flex: 1; }
+        .paquetes-balance-chip { background: var(--gs-white); border: 1.5px solid #e8d5c4; border-radius: 8px; padding: 0.4rem 0.9rem; font-size: 1.2rem; color: var(--gs-brown-md); }
+        .paquetes-balance-chip strong { color: var(--gs-accent); }
+        .paquetes-balance-link { font-size: 1.2rem; color: var(--gs-accent); text-decoration: none; border: 1.5px solid var(--gs-accent); border-radius: 30px; padding: 0.35rem 1rem; flex-shrink: 0; transition: background 0.18s; }
+        .paquetes-balance-link:hover { background: var(--gs-accent); color: #fff; }
+
+        /* ── Reservation cards ───────────────────────────────────────────────── */
+        #mis-reservas { display: flex; flex-direction: column; gap: 1rem; }
+        .reserva-card {
+            background: var(--gs-white); border: 1.5px solid var(--gs-border);
+            border-radius: 16px; padding: 1.3rem 1.6rem;
+            display: flex; align-items: center; flex-wrap: wrap;
+            gap: 0.8rem 1.4rem; transition: box-shadow 0.2s, border-color 0.2s;
+            animation: rcFadeUp 0.38s ease both;
+        }
+        .reserva-card:nth-child(1){animation-delay:.04s} .reserva-card:nth-child(2){animation-delay:.1s}
+        .reserva-card:nth-child(3){animation-delay:.16s} .reserva-card:nth-child(4){animation-delay:.22s}
+        @keyframes rcFadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        .reserva-card:hover { box-shadow: 0 5px 18px rgba(45,31,23,0.07); border-color: #ddd0c4; }
+        .reserva-card.cancelada { opacity: 0.6; border-color: #e0dbd5; }
+
+        .reserva-info { flex: 1; min-width: 180px; }
+        .reserva-disciplina { font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 700; color: var(--gs-brown-md); margin-bottom: 0.25rem; }
+        .reserva-fecha { font-size: 1.3rem; color: var(--gs-muted); }
+        .reserva-badge {
+            font-size: 1.1rem; font-weight: 700; padding: 0.28rem 0.85rem;
+            border-radius: 20px; letter-spacing: 0.04em; flex-shrink: 0;
+        }
+        .badge-activa   { background: var(--gs-sage-lt); color: #155724; }
+        .badge-cancelada { background: #f8d7da; color: #721c24; }
+
+        .reserva-cancel-btn {
+            flex-shrink: 0; padding: 0.45rem 1.2rem; border-radius: 30px;
+            font-size: 1.2rem; font-weight: 600; border: 1.5px solid var(--gs-danger);
+            background: transparent; color: var(--gs-danger); cursor: pointer;
+            transition: background 0.18s, color 0.18s;
+        }
+        .reserva-cancel-btn:hover:not(:disabled) { background: var(--gs-danger); color: #fff; }
+        .reserva-cancel-btn:disabled { opacity: 0.5; cursor: default; }
+
+        /* ── Empty state ─────────────────────────────────────────────────────── */
+        .mr-empty { text-align: center; padding: 4rem 1rem; background: var(--gs-white); border: 1.5px solid var(--gs-border); border-radius: 18px; }
+        .mr-empty-icon { font-size: 3.4rem; margin-bottom: 0.8rem; }
+        .mr-empty-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gs-brown); margin: 0 0 0.5rem; }
+        .mr-empty-sub { color: var(--gs-muted); font-size: 1.4rem; margin: 0 0 1.4rem; }
+        .mr-empty-cta { display: inline-block; padding: 0.6rem 1.7rem; border-radius: 30px; font-size: 1.4rem; font-weight: 600; text-decoration: none; background: var(--gs-accent); color: #fff; transition: background 0.18s; }
+        .mr-empty-cta:hover { background: #b5854f; }
+    </style>
 </head>
 <body>
 
@@ -65,10 +161,19 @@
     <main>
         <section class="schedule-section">
             <h2>Mis Reservas</h2>
+            <p class="mr-subheading">Tus clases reservadas y tu balance de paquetes</p>
 
-            <div class="schedule-section" id="mis-paquetes"></div>
+            <div class="mr-stats" id="mr-stats"></div>
 
-            <div class="schedule" id="mis-reservas"></div>
+            <div id="mis-paquetes"></div>
+
+            <div class="mr-tabs" id="mr-tabs">
+                <button class="mr-tab active" data-filter="todas">Todas</button>
+                <button class="mr-tab" data-filter="activa">Activas</button>
+                <button class="mr-tab" data-filter="cancelada">Canceladas</button>
+            </div>
+
+            <div id="mis-reservas"></div>
         </section>
     </main>
 

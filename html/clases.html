@@ -22,7 +22,117 @@
     
     <link rel="preload" href="../css/style.css" as="style">
     <link rel="stylesheet" href="../css/style.css">
-    
+
+    <style>
+        :root {
+            --gs-cream: #faf8f5; --gs-white: #fff; --gs-border: #ede8e2;
+            --gs-accent: #c9956a; --gs-accent-lt: #f5ede5;
+            --gs-brown: #2d1f17; --gs-brown-md: #3d2b1f; --gs-muted: #8c7168;
+            --gs-sage: #4a7c5f; --gs-sage-lt: #d4edda;
+        }
+
+        body { background: var(--gs-cream); }
+
+        /* ── Override schedule section defaults ─────────────────────────────── */
+        .schedule-section { padding: 2.5rem 1.4rem 4rem; max-width: 1180px; margin: auto; }
+        .schedule-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5vw, 3.6rem);
+            color: var(--gs-brown); text-align: center;
+            margin: 0 0 0.5rem; font-weight: 700;
+        }
+        .clases-subheading { text-align: center; color: var(--gs-muted); font-size: 1.5rem; margin: 0 0 2.2rem; }
+
+        .schedule { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.4rem; }
+
+        /* ── Day card ────────────────────────────────────────────────────────── */
+        .day-card {
+            background: var(--gs-white) !important;
+            border: 1.5px solid var(--gs-border) !important;
+            border-radius: 18px !important;
+            padding: 1.6rem 1.5rem !important;
+            box-shadow: none !important;
+            max-width: none !important;
+            transition: box-shadow 0.22s, transform 0.22s, border-color 0.22s;
+            animation: dcFadeUp 0.4s ease both;
+        }
+        .day-card:nth-child(1){animation-delay:.04s} .day-card:nth-child(2){animation-delay:.1s}
+        .day-card:nth-child(3){animation-delay:.16s} .day-card:nth-child(4){animation-delay:.22s}
+        .day-card:nth-child(5){animation-delay:.28s} .day-card:nth-child(6){animation-delay:.34s}
+        @keyframes dcFadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .day-card:hover { box-shadow: 0 8px 28px rgba(45,31,23,0.09) !important; transform: translateY(-4px); border-color: #ddd0c4 !important; }
+
+        .day-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem !important; font-weight: 700;
+            color: var(--gs-brown) !important;
+            margin-bottom: 1.2rem !important;
+            padding-bottom: 0.7rem;
+            border-bottom: 1.5px solid var(--gs-border);
+        }
+
+        /* ── Class item ──────────────────────────────────────────────────────── */
+        .class-item {
+            background: var(--gs-cream) !important;
+            border: 1px solid var(--gs-border) !important;
+            border-radius: 12px !important;
+            padding: 1rem 1.1rem !important;
+            margin-bottom: 0.8rem !important;
+            transition: background 0.15s;
+        }
+        .class-item:last-child { margin-bottom: 0 !important; }
+        .class-item:hover { background: var(--gs-accent-lt) !important; }
+
+        .class-name { font-size: 1.5rem !important; font-weight: 700 !important; color: var(--gs-brown-md) !important; margin-bottom: 0.3rem; }
+        .class-time { font-size: 1.25rem !important; color: var(--gs-muted) !important; margin-bottom: 0.2rem; }
+
+        /* Capacity bar */
+        .class-capacity { margin: 0.4rem 0 0.6rem; }
+        .class-capacity-bar {
+            height: 5px; background: var(--gs-border); border-radius: 4px; overflow: hidden;
+        }
+        .class-capacity-fill { height: 100%; border-radius: 4px; transition: width 0.3s; background: var(--gs-accent); }
+        .class-capacity-fill.full { background: #e67e73; }
+        .class-capacity-text { font-size: 1.15rem; color: var(--gs-muted); margin-top: 0.25rem; }
+
+        /* ── Reserve button override ─────────────────────────────────────────── */
+        .reserve-btn {
+            background: var(--gs-accent) !important;
+            color: #fff !important;
+            border-radius: 30px !important;
+            padding: 0.5rem 1.4rem !important;
+            font-size: 1.3rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+            margin-top: 0.4rem !important;
+            transition: background 0.18s !important;
+            cursor: pointer;
+        }
+        .reserve-btn:hover:not(:disabled) { background: #b5854f !important; }
+        .reserve-btn:disabled { background: #d0c4ba !important; cursor: default !important; }
+
+        /* ── Reservation success card ────────────────────────────────────────── */
+        .reserva-success {
+            background: var(--gs-sage-lt); border: 1.5px solid #b0d4bc;
+            border-radius: 12px; padding: 1rem 1.2rem; margin-top: 0.4rem;
+            font-size: 1.3rem; color: var(--gs-sage);
+        }
+        .reserva-success strong { display: block; font-size: 1.4rem; margin-bottom: 0.25rem; }
+        .reserva-success a { color: var(--gs-sage); font-weight: 600; text-decoration: underline; }
+
+        /* ── No package message ──────────────────────────────────────────────── */
+        .sin-paquete-msg {
+            background: var(--gs-accent-lt); border: 1.5px solid #e8d5c4;
+            border-radius: 12px; padding: 1rem 1.2rem; margin-top: 0.6rem;
+            font-size: 1.3rem; color: var(--gs-brown-md);
+        }
+        .sin-paquete-msg a { color: var(--gs-accent); font-weight: 600; }
+
+        /* ── Empty / loading states ──────────────────────────────────────────── */
+        .clases-empty { text-align: center; padding: 4rem 1rem; color: var(--gs-muted); font-size: 1.5rem; }
+        .clases-empty-icon { font-size: 3rem; display: block; margin-bottom: 0.8rem; }
+    </style>
+
 </head>
 <body>
     
@@ -66,9 +176,9 @@
     <main>
         <section class="schedule-section">
             <h2>Nuestras Clases</h2>
+            <p class="clases-subheading">Reserva tu lugar en las próximas sesiones</p>
             <div class="schedule" id="schedule"></div>
         </section>
-        
     </main>
 
     <footer class="footer">

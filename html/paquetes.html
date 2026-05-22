@@ -24,43 +24,110 @@
     <link rel="stylesheet" href="../css/style.css">
 
     <style>
-        /* ── Purchase confirmation overlay ──────────────────────────────────── */
-        .paquete { position: relative; }
+        :root {
+            --gs-cream: #faf8f5; --gs-white: #fff; --gs-border: #ede8e2;
+            --gs-accent: #c9956a; --gs-accent-lt: #f5ede5;
+            --gs-brown: #2d1f17; --gs-brown-md: #3d2b1f; --gs-muted: #8c7168;
+            --gs-sage: #4a7c5f;
+        }
+
+        /* ── Page wrapper ────────────────────────────────────────────────────── */
+        .contenedor-paquetes { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.4rem 4rem; }
+
+        /* ── Page heading ────────────────────────────────────────────────────── */
+        .paquetes-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.6rem, 5vw, 3.8rem);
+            color: var(--gs-brown); text-align: center;
+            margin: 0 0 0.5rem; font-weight: 700;
+        }
+        .paquetes-subheading {
+            text-align: center; color: var(--gs-muted);
+            font-size: 1.5rem; margin: 0 0 2.4rem;
+        }
+
+        /* ── Active packages balance bar ─────────────────────────────────────── */
+        .balance-wrap {
+            background: var(--gs-accent-lt);
+            border: 1.5px solid #e8d5c4; border-radius: 16px;
+            padding: 1.3rem 1.8rem; margin: 0 0 2.4rem;
+            display: flex; flex-wrap: wrap; align-items: center;
+            gap: 0.8rem 1.4rem; justify-content: space-between;
+        }
+        .balance-heading { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--gs-brown); margin: 0; flex-shrink: 0; }
+        .balance-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; flex: 1; }
+        .balance-chip {
+            background: var(--gs-white); border: 1.5px solid #e8d5c4;
+            border-radius: 10px; padding: 0.5rem 1.1rem;
+            font-size: 1.3rem; color: var(--gs-brown-md);
+        }
+        .balance-chip strong { color: var(--gs-accent); font-weight: 700; }
+        .balance-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; flex-shrink: 0; }
+        .balance-link {
+            font-size: 1.25rem; color: var(--gs-accent); text-decoration: none;
+            border: 1.5px solid var(--gs-accent); border-radius: 30px;
+            padding: 0.42rem 1.2rem; transition: background 0.18s, color 0.18s;
+        }
+        .balance-link:hover { background: var(--gs-accent); color: #fff; }
+
+        /* ── Override global .paquete card sizes ─────────────────────────────── */
+        .paquete {
+            border: 1.5px solid var(--gs-border) !important;
+            border-radius: 18px !important;
+            padding: 1.8rem 1.6rem 1.4rem !important;
+            background: var(--gs-white);
+            transition: box-shadow 0.22s, transform 0.22s, border-color 0.22s !important;
+            display: flex; flex-direction: column;
+            animation: pqFadeUp 0.45s ease both;
+            position: relative;
+        }
+        .paquete:nth-child(1){animation-delay:.04s} .paquete:nth-child(2){animation-delay:.11s}
+        .paquete:nth-child(3){animation-delay:.18s} .paquete:nth-child(4){animation-delay:.25s}
+        .paquete:nth-child(5){animation-delay:.32s} .paquete:nth-child(6){animation-delay:.39s}
+        @keyframes pqFadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        .paquete:hover { background: var(--gs-white) !important; box-shadow: 0 10px 32px rgba(45,31,23,0.1) !important; transform: translateY(-5px); border-color: var(--gs-accent) !important; }
+
+        .paquete h5 { font-size: 1.15rem !important; margin: 0 0 0.5rem !important; color: var(--gs-accent) !important; text-transform: uppercase; letter-spacing: 0.09em; font-weight: 600; }
+        .paquete h3 { font-family: 'Playfair Display', serif !important; font-size: 2.1rem !important; margin: 0 0 0.5rem !important; color: var(--gs-brown) !important; line-height: 1.2; font-weight: 700; }
+        .paquete h4 { font-size: 2rem !important; margin: 0 !important; color: var(--gs-brown-md) !important; font-weight: 700; }
+        .flex-monto { margin-top: auto; padding-top: 1rem; }
+        .flex-monto span { font-size: 1.8rem !important; }
+
+        /* Demo notice */
+        .pkg-demo-note { font-size: 1.15rem; color: var(--gs-muted); font-style: italic; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--gs-border); }
+
+        /* ── Purchase confirmation & receipt ─────────────────────────────────── */
         .glow-confirm-overlay { margin-top: 1rem; }
         .glow-confirm-card, .glow-recibo-card {
-            background: #fff;
-            border: 1.5px solid #e8ddd5;
-            border-radius: 12px;
-            padding: 1.4rem 1.6rem;
-            font-size: 1.4rem;
-            color: #3d2b1f;
+            background: var(--gs-white); border: 1.5px solid var(--gs-border);
+            border-radius: 14px; padding: 1.5rem 1.7rem;
+            font-size: 1.4rem; color: var(--gs-brown-md);
         }
-        .glow-confirm-title, .glow-recibo-title {
-            font-size: 1.6rem; font-weight: 700; margin: 0 0 0.6rem; color: #3d2b1f;
-        }
-        .glow-confirm-pkg { font-size: 1.5rem; font-weight: 600; color: #c9956a; margin: 0 0 0.8rem; }
+        .glow-confirm-title, .glow-recibo-title { font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 700; margin: 0 0 0.6rem; color: var(--gs-brown); }
+        .glow-confirm-pkg { font-size: 1.5rem; font-weight: 600; color: var(--gs-accent); margin: 0 0 0.8rem; }
         .glow-confirm-details { list-style: none; padding: 0; margin: 0 0 0.8rem; }
-        .glow-confirm-details li { display: flex; justify-content: space-between; padding: 0.3rem 0;
-            border-bottom: 1px solid #f0e8e0; font-size: 1.3rem; }
-        .glow-confirm-nota { font-size: 1.2rem; color: #9a7060; font-style: italic; margin: 0.5rem 0 1rem; }
+        .glow-confirm-details li { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid #f0e8e0; font-size: 1.3rem; }
+        .glow-confirm-nota { font-size: 1.2rem; color: var(--gs-muted); font-style: italic; margin: 0.5rem 0 1rem; padding: 0.6rem 0.8rem; background: var(--gs-cream); border-radius: 8px; }
         .glow-confirm-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
-        .glow-confirm-yes { font-size: 1.3rem !important; padding: 0.55rem 1.2rem !important; }
-        .glow-confirm-cancel {
-            background: transparent; border: 1.5px solid #e0d5cc; border-radius: 6px;
-            padding: 0.55rem 1.2rem; font-size: 1.3rem; color: #8a6550; cursor: pointer;
-            transition: background 0.15s;
+        .glow-confirm-yes { font-size: 1.3rem !important; padding: 0.55rem 1.3rem !important; }
+        .glow-confirm-cancel { background: transparent; border: 1.5px solid var(--gs-border); border-radius: 8px; padding: 0.55rem 1.3rem; font-size: 1.3rem; color: var(--gs-muted); cursor: pointer; transition: background 0.15s; }
+        .glow-confirm-cancel:hover { background: var(--gs-accent-lt); border-color: var(--gs-accent); }
+        .glow-confirm-msg { min-height: 1.5rem; font-size: 1.2rem; margin-top: 0.6rem; }
+
+        .glow-recibo-check { font-size: 2.6rem; color: var(--gs-sage); margin-bottom: 0.3rem; }
+        .glow-recibo-grid { display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 1.4rem; font-size: 1.3rem; margin: 0.9rem 0 1rem; }
+        .glow-recibo-grid span { color: var(--gs-muted); }
+        .glow-recibo-grid strong { color: var(--gs-brown-md); font-weight: 700; }
+        .glow-recibo-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.4rem; }
+        .glow-recibo-btn {
+            display: inline-block; padding: 0.55rem 1.4rem; border-radius: 30px;
+            font-size: 1.3rem; font-weight: 600; text-decoration: none;
+            border: none; cursor: pointer; transition: background 0.18s, color 0.18s;
         }
-        .glow-confirm-cancel:hover { background: #f5ede5; }
-        .glow-confirm-msg { min-height: 1.5rem; font-size: 1.2rem; margin-top: 0.5rem; }
-        /* ── Receipt ──────────────────────────────────────────────────────────── */
-        .glow-recibo-check { font-size: 2.4rem; color: #2d6a4f; margin-bottom: 0.3rem; }
-        .glow-recibo-grid {
-            display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.2rem;
-            font-size: 1.3rem; margin: 0.8rem 0;
-        }
-        .glow-recibo-grid span { color: #9a7060; }
-        .glow-recibo-grid strong { color: #3d2b1f; }
-        .glow-recibo-link { font-size: 1.3rem; color: #2d6a4f; margin-top: 0.8rem; }
+        .glow-recibo-btn-primary { background: var(--gs-sage); color: #fff; }
+        .glow-recibo-btn-primary:hover { background: #3a6349; }
+        .glow-recibo-btn-secondary { background: transparent; border: 1.5px solid var(--gs-accent); color: var(--gs-accent); }
+        .glow-recibo-btn-secondary:hover { background: var(--gs-accent); color: #fff; }
     </style>
 
 </head>
@@ -104,7 +171,8 @@
 
     <main>
         <section class="contenedor-paquetes">
-            <h2 class="centrar-texto">Paquetes</h2>
+            <h2 class="paquetes-heading">Paquetes</h2>
+            <p class="paquetes-subheading">Elige el plan que mejor se adapte a tu práctica</p>
             <div id="mis-paquetes-section"></div>
             <div class="paquetes" id="paquetes-container"></div>
         </section>
